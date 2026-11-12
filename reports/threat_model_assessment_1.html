@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI ThreatModel Studio – Connected Autonomous Vehicle Subsystem</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 32px; background: #f8fafc; color: #1e293b; }
+        .container { max-width: 1000px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #0284c7; padding-bottom: 20px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .header h1 { margin: 0; color: #0f172a; font-size: 26px; }
+        .badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+        .stat-card { background: #f1f5f9; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid #0284c7; }
+        .stat-card.crit { border-left-color: #dc2626; }
+        .stat-card.high { border-left-color: #ea580c; }
+        .stat-val { font-size: 28px; font-weight: 700; color: #0f172a; }
+        .stat-lbl { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+        .threat-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: #ffffff; page-break-inside: avoid; }
+        .threat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .category-pill { font-size: 11px; font-weight: 700; text-transform: uppercase; background: #ede9fe; color: #6d28d9; padding: 2px 8px; border-radius: 4px; }
+        .severity-badge { color: #ffffff; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; }
+        .meta-line { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .status-badge { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+        .threat-desc { font-size: 14px; line-height: 1.5; color: #334155; margin: 8px 0; }
+        .threat-vector { font-size: 13px; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; }
+        .tara-box { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 8px 12px; font-size: 13px; margin-bottom: 12px; }
+        .mitigation-section { background: #f8fafc; padding: 12px 16px; border-radius: 6px; font-size: 13px; }
+        .mitigation-section ul { margin: 6px 0 0 0; padding-left: 20px; }
+        .mitigation-section li { margin-bottom: 6px; }
+        @media print { body { background: #fff; padding: 0; } .container { box-shadow: none; border-radius: 0; padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Connected Autonomous Vehicle Subsystem</h1>
+                <p style="margin: 6px 0; color: #475569;">Business Domain: <strong>Automotive Engineering</strong> &bull; Methodology: <span class="badge">STRIDE Threat Modeling</span></p>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge">AI ThreatModel Studio 1.0</span>
+                <p style="margin: 6px 0; font-size: 12px; color: #64748b;">Report Date: 2026-11-12 06:51:29 UTC</p>
+            </div>
+        </div>
+
+        <h2>Executive Risk Summary</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val">6</div>
+                <div class="stat-lbl">Total Threats</div>
+            </div>
+            <div class="stat-card crit">
+                <div class="stat-val">2</div>
+                <div class="stat-lbl">Critical Risk</div>
+            </div>
+            <div class="stat-card high">
+                <div class="stat-val">1</div>
+                <div class="stat-lbl">High Risk</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val">6</div>
+                <div class="stat-lbl">Actionable Mitigations</div>
+            </div>
+        </div>
+
+        <h2>Structured Threat Register</h2>
+        
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Spoofing</span>
+                        <h3 style="margin: 4px 0;">JWT Signature Verification Bypass in Telematics Unit</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">APPROVED</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #dc2626;">
+                        Critical (20/25)
+                    </div>
+                </div>
+                <p class="threat-desc">An attacker alters the algorithm header of the authentication token or exploits weak signing keys to impersonate legitimate security principals communicating with Telematics Unit.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Cryptographic signature bypass / None algorithm acceptance</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Strict Algorithm Whitelisting & Asymmetric Key Verification</strong> (Effort: Medium, Status: proposed)<br><small>Reject tokens with 'none' or mismatched algorithms. Enforce RS256/ES256 verification using a cryptographically managed JWKS endpoint.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Tampering</span>
+                        <h3 style="margin: 4px 0;">In-Flight Parameter & Payload Tampering across Telematics Unit -> Braking Controller</h3>
+                        <div class="meta-line">Target: <strong>Braking Controller</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #d97706;">
+                        Medium (8/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Lack of strict mutual TLS or cryptographic payload hashing enables attackers with internal network visibility to alter transaction instructions in transit.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Man-in-the-Middle (MitM) packet manipulation</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Enforce Strict Mutual TLS (mTLS) with Certificate Pinning</strong> (Effort: High, Status: proposed)<br><small>Require bidirectional mTLS with cryptographic payload integrity verification on all inter-service communications.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Repudiation</span>
+                        <h3 style="margin: 4px 0;">Insufficient Audit Trail for Critical Administrative Actions in Telematics Unit</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #d97706;">
+                        Medium (12/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Administrative state modifications and privileged policy overrides in Telematics Unit are either unlogged or written to non-immutable local files without tamper protection.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Log evasion and non-repudiation failure</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Detective] Centralized Write-Once-Read-Many (WORM) Audit Logging</strong> (Effort: Medium, Status: proposed)<br><small>Stream audit logs in real-time over TLS to an immutable append-only SIEM with cryptographic log signing.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Information Disclosure</span>
+                        <h3 style="margin: 4px 0;">Unmasked Sensitive Data Leakage in Error Responses and Traces from Telematics Unit</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #d97706;">
+                        Medium (12/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Detailed stack traces, database schema fragments, and partial customer records in Telematics Unit are returned to client interfaces upon unhandled exceptions.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Verbose error message disclosure & CWE-209</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Global Exception Handler & Data Masking</strong> (Effort: Low, Status: proposed)<br><small>Implement unified exception handlers that return generic RFC 7807 error responses while logging full sanitized stack traces internally.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Denial of Service</span>
+                        <h3 style="margin: 4px 0;">Unbounded Resource Exhaustion & Algorithmic DoS on Telematics Unit</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #ea580c;">
+                        High (16/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Endpoints in Telematics Unit allow unrestricted payload sizes and nested JSON objects without rate limiting, causing CPU starvation and memory exhaustion.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Resource exhaustion / Billion laughs / ReDoS</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Strict Rate Limiting & Max Payload Size Enforcement</strong> (Effort: Low, Status: proposed)<br><small>Apply token bucket rate limiting at Nginx/Gateway level and enforce max body size of 1MB.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Elevation of Privilege</span>
+                        <h3 style="margin: 4px 0;">Broken Object Level Authorization (BOLA/IDOR) in Braking Controller</h3>
+                        <div class="meta-line">Target: <strong>Braking Controller</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #dc2626;">
+                        Critical (20/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Users can access and modify records belonging to other tenants by manipulating numeric ID parameters in Braking Controller endpoints.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Insecure Direct Object Reference (IDOR) / BOLA</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Contextual Authorization Checks at Data Access Layer</strong> (Effort: Medium, Status: proposed)<br><small>Validate that the authenticated session user explicitly owns or has permission on the requested resource ID at the repository layer.</small></li></ul>
+                </div>
+            </div>
+            
+    </div>
+</body>
+</html>

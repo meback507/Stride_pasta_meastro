@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI ThreatModel Studio – Connected Autonomous Vehicle Subsystem</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 32px; background: #f8fafc; color: #1e293b; }
+        .container { max-width: 1000px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #0284c7; padding-bottom: 20px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .header h1 { margin: 0; color: #0f172a; font-size: 26px; }
+        .badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+        .stat-card { background: #f1f5f9; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid #0284c7; }
+        .stat-card.crit { border-left-color: #dc2626; }
+        .stat-card.high { border-left-color: #ea580c; }
+        .stat-val { font-size: 28px; font-weight: 700; color: #0f172a; }
+        .stat-lbl { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+        .threat-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: #ffffff; page-break-inside: avoid; }
+        .threat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .category-pill { font-size: 11px; font-weight: 700; text-transform: uppercase; background: #ede9fe; color: #6d28d9; padding: 2px 8px; border-radius: 4px; }
+        .severity-badge { color: #ffffff; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; }
+        .meta-line { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .status-badge { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+        .threat-desc { font-size: 14px; line-height: 1.5; color: #334155; margin: 8px 0; }
+        .threat-vector { font-size: 13px; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; }
+        .tara-box { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 8px 12px; font-size: 13px; margin-bottom: 12px; }
+        .mitigation-section { background: #f8fafc; padding: 12px 16px; border-radius: 6px; font-size: 13px; }
+        .mitigation-section ul { margin: 6px 0 0 0; padding-left: 20px; }
+        .mitigation-section li { margin-bottom: 6px; }
+        @media print { body { background: #fff; padding: 0; } .container { box-shadow: none; border-radius: 0; padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Connected Autonomous Vehicle Subsystem</h1>
+                <p style="margin: 6px 0; color: #475569;">Business Domain: <strong>Automotive Engineering</strong> &bull; Methodology: <span class="badge">PASTA (Process for Attack Simulation & Threat Analysis)</span></p>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge">AI ThreatModel Studio 1.0</span>
+                <p style="margin: 6px 0; font-size: 12px; color: #64748b;">Report Date: 2026-11-12 06:51:30 UTC</p>
+            </div>
+        </div>
+
+        <h2>Executive Risk Summary</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val">4</div>
+                <div class="stat-lbl">Total Threats</div>
+            </div>
+            <div class="stat-card crit">
+                <div class="stat-val">1</div>
+                <div class="stat-lbl">Critical Risk</div>
+            </div>
+            <div class="stat-card high">
+                <div class="stat-val">2</div>
+                <div class="stat-lbl">High Risk</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val">4</div>
+                <div class="stat-lbl">Actionable Mitigations</div>
+            </div>
+        </div>
+
+        <h2>Structured Threat Register</h2>
+        
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Stage IV: Threat Analysis</span>
+                        <h3 style="margin: 4px 0;">Financially Motivated Ransomware & Extortion Campaign on Telematics Unit</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">APPROVED</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #dc2626;">
+                        Critical (20/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Organized cybercrime groups target the Automotive Engineering environment seeking to exfiltrate proprietary customer data and encrypt operational databases.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Credential stuffing followed by privilege escalation and double-extortion ransomware</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Phishing-Resistant MFA & Behavior-Based EDR</strong> (Effort: High, Status: proposed)<br><small>Mandate FIDO2/WebAuthn hardware tokens and deploy behavior-based endpoint detection and response with rapid network isolation capabilities.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Stage V: Vulnerability & Weakness Analysis</span>
+                        <h3 style="margin: 4px 0;">Supply Chain Dependency Poisoning & Unpatched Third-Party Flaws in Telematics Unit</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #ea580c;">
+                        High (16/25)
+                    </div>
+                </div>
+                <p class="threat-desc">The platform relies on external packages containing known critical vulnerabilities (CVEs) or vulnerable transitive dependencies that enable remote code execution.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Dependency Confusion / Malicious Package Injection / Known CVE Exploit</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Automated CI/CD Software Composition Analysis (SCA) & Container Signing</strong> (Effort: Medium, Status: proposed)<br><small>Block builds containing High/Critical CVEs using automated SCA scanning and enforce cryptographic image signing via Cosign/Sigstore.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Stage VI: Attack Modeling & Simulation</span>
+                        <h3 style="margin: 4px 0;">Multi-Step Lateral Traversal & Privilege Escalation Attack Tree</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #ea580c;">
+                        High (15/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Attacker establishes initial foothold in DMZ tier and leverages misconfigured service mesh IAM roles to assume cluster administrator privileges.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Kubernetes Service Account Token Theft & AWS/Cloud Metadata SSRF</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Enforce IMDSv2, Egress Filtering & Least Privilege IAM</strong> (Effort: Medium, Status: proposed)<br><small>Require session tokens for instance metadata (IMDSv2 hop limit 1), restrict egress traffic via Calico network policies, and scope IAM roles tightly.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Stage VII: Risk & Impact Analysis</span>
+                        <h3 style="margin: 4px 0;">Business Process Disruption & Regulatory Non-Compliance via Data Poisoning</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #d97706;">
+                        Medium (10/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Tampering with core transaction logs causes incorrect automated financial reconciliations, triggering regulatory reporting non-compliance and material financial restatement.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Integrity violation on automated accounting data pipeline</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Cryptographic Ledger Checkpointing & Segregation of Duties</strong> (Effort: High, Status: proposed)<br><small>Implement hash-chained audit ledgers and dual-control approval for all reconciliation state modifications.</small></li></ul>
+                </div>
+            </div>
+            
+    </div>
+</body>
+</html>

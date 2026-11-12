@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI ThreatModel Studio – Connected Autonomous Vehicle Subsystem</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 32px; background: #f8fafc; color: #1e293b; }
+        .container { max-width: 1000px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #0284c7; padding-bottom: 20px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .header h1 { margin: 0; color: #0f172a; font-size: 26px; }
+        .badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+        .stat-card { background: #f1f5f9; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid #0284c7; }
+        .stat-card.crit { border-left-color: #dc2626; }
+        .stat-card.high { border-left-color: #ea580c; }
+        .stat-val { font-size: 28px; font-weight: 700; color: #0f172a; }
+        .stat-lbl { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+        .threat-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: #ffffff; page-break-inside: avoid; }
+        .threat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .category-pill { font-size: 11px; font-weight: 700; text-transform: uppercase; background: #ede9fe; color: #6d28d9; padding: 2px 8px; border-radius: 4px; }
+        .severity-badge { color: #ffffff; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; }
+        .meta-line { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .status-badge { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+        .threat-desc { font-size: 14px; line-height: 1.5; color: #334155; margin: 8px 0; }
+        .threat-vector { font-size: 13px; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; }
+        .tara-box { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 8px 12px; font-size: 13px; margin-bottom: 12px; }
+        .mitigation-section { background: #f8fafc; padding: 12px 16px; border-radius: 6px; font-size: 13px; }
+        .mitigation-section ul { margin: 6px 0 0 0; padding-left: 20px; }
+        .mitigation-section li { margin-bottom: 6px; }
+        @media print { body { background: #fff; padding: 0; } .container { box-shadow: none; border-radius: 0; padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Connected Autonomous Vehicle Subsystem</h1>
+                <p style="margin: 6px 0; color: #475569;">Business Domain: <strong>Automotive Engineering</strong> &bull; Methodology: <span class="badge">ISO/SAE 21434 TARA (Automotive Cybersecurity)</span></p>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge">AI ThreatModel Studio 1.0</span>
+                <p style="margin: 6px 0; font-size: 12px; color: #64748b;">Report Date: 2026-11-12 06:51:32 UTC</p>
+            </div>
+        </div>
+
+        <h2>Executive Risk Summary</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val">4</div>
+                <div class="stat-lbl">Total Threats</div>
+            </div>
+            <div class="stat-card crit">
+                <div class="stat-val">3</div>
+                <div class="stat-lbl">Critical Risk</div>
+            </div>
+            <div class="stat-card high">
+                <div class="stat-val">0</div>
+                <div class="stat-lbl">High Risk</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val">4</div>
+                <div class="stat-lbl">Actionable Mitigations</div>
+            </div>
+        </div>
+
+        <h2>Structured Threat Register</h2>
+        
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Threat Scenario</span>
+                        <h3 style="margin: 4px 0;">Remote Code Execution on Telematics Unit via Cellular Air Interface</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">APPROVED</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #dc2626;">
+                        Critical (20/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Vulnerabilities in the cellular modem firmware or MQTT telematics stack allow a remote adversary to achieve root shell execution on the TCU without physical vehicle access.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Over-the-Air Cellular Baseband Buffer Overflow / Protocol Exploit</div>
+                <div class='tara-box'><strong>ISO 21434:</strong> Feasibility: Medium | SFOP: S:Severe, F:Major, O:Major, P:Severe | Risk Value: 3/5</div>
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Hardware Security Module (HSM) & Secure Boot</strong> (Effort: High, Status: proposed)<br><small>Enforce cryptographic secure boot with hardware root-of-trust in HSM and isolate telematics runtime using ARM TrustZone or seL4 microkernel.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Attack Path & Feasibility</span>
+                        <h3 style="margin: 4px 0;">Lateral Pivot from Infotainment/TCU to Safety CAN Bus via Central Gateway</h3>
+                        <div class="meta-line">Target: <strong>System Wide</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #d97706;">
+                        Medium (15/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Insufficient domain segregation or routing filter misconfigurations in the Central Gateway ECU permit arbitrary CAN frame injection onto the safety-critical chassis bus.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> CAN ID Spoofing across Central Gateway boundary</div>
+                <div class='tara-box'><strong>ISO 21434:</strong> Feasibility: Medium | SFOP: S:Severe, F:Major, O:Major, P:Low | Risk Value: 3/5</div>
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] AUTOSAR Secure Onboard Communication (SecOC) & CAN IDS</strong> (Effort: High, Status: proposed)<br><small>Implement SecOC with freshness values and MAC verification for all safety-relevant CAN-FD messages, coupled with CAN-bus Intrusion Detection Systems (IDS).</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Damage Scenario (SFOP)</span>
+                        <h3 style="margin: 4px 0;">Malicious Firmware Flashing via Diagnostic OBD-II Interface</h3>
+                        <div class="meta-line">Target: <strong>System Wide</strong> &bull; Asset: <strong>Architecture Asset</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #dc2626;">
+                        Critical (20/25)
+                    </div>
+                </div>
+                <p class="threat-desc">An attacker connected to the physical OBD-II diagnostic port bypasses SecurityAccess (UDS Service 0x27) to flash unauthorized modified calibration files or malicious firmware into vehicle ECUs.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Physical OBD-II Port / UDS Diagnostic Protocol Exploit</div>
+                <div class='tara-box'><strong>ISO 21434:</strong> Feasibility: High | SFOP: S:Major, F:Major, O:Severe, P:Negligible | Risk Value: 5/5</div>
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Asymmetric Diagnostic Authentication & OBD-II Firewall</strong> (Effort: Medium, Status: proposed)<br><small>Enforce ISO 13400-2 DoIP with TLS and asymmetric certificate-based authentication for diagnostic services (zero static seed-key algorithms).</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Damage Scenario (SFOP)</span>
+                        <h3 style="margin: 4px 0;">Eavesdropping and Relay Attack on Passive Keyless Entry (PKE) BLE Interface</h3>
+                        <div class="meta-line">Target: <strong>System Wide</strong> &bull; Asset: <strong>Architecture Asset</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #dc2626;">
+                        Critical (20/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Adversaries employ wireless signal relay transceivers or Bluetooth Low Energy (BLE) spoofing to trick the vehicle into unlocking and enabling vehicle ignition without owner proximity.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Sub-GHz / BLE Radio Frequency Relay Attack</div>
+                <div class='tara-box'><strong>ISO 21434:</strong> Feasibility: High | SFOP: S:Low, F:Severe, O:Major, P:Severe | Risk Value: 5/5</div>
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Ultra-Wideband (UWB) Time-of-Flight (ToF) Distance Bounding</strong> (Effort: High, Status: proposed)<br><small>Replace or augment BLE with Ultra-Wideband (UWB) physical layer distance bounding to verify true physical proximity via speed-of-light measurements.</small></li></ul>
+                </div>
+            </div>
+            
+    </div>
+</body>
+</html>

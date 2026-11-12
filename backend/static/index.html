@@ -1,0 +1,1487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI ThreatModel Studio – LLM-Powered Cybersecurity Threat Modeling</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --primary-light: #e0f2fe;
+      --primary-dark: #075985;
+      --bg: #0f172a;
+      --card-bg: #1e293b;
+      --card-border: #334155;
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --crit: #ef4444;
+      --high: #f97316;
+      --med: #eab308;
+      --low: #22c55e;
+      --info: #38bdf8;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header & Navigation */
+    header {
+      background: #090e17;
+      border-bottom: 1px solid var(--card-border);
+      padding: 0.85rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .shield-icon {
+      width: 32px;
+      height: 32px;
+      fill: var(--primary);
+    }
+    .logo-text {
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #38bdf8 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .badge-pill {
+      font-size: 0.7rem;
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    nav {
+      display: flex;
+      gap: 8px;
+    }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+    }
+    .nav-btn:hover {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-btn.active {
+      color: #fff;
+      background: var(--primary);
+      box-shadow: 0 0 15px rgba(2, 132, 199, 0.4);
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      padding: 2rem;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.25s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* Dashboard Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+    .metric-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .metric-card::before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--primary);
+    }
+    .metric-card.crit::before { background: var(--crit); }
+    .metric-card.high::before { background: var(--high); }
+    .metric-card.med::before { background: var(--med); }
+    .metric-card.low::before { background: var(--low); }
+    .metric-val {
+      font-size: 2.25rem;
+      font-weight: 800;
+      font-family: var(--font-mono);
+      margin: 6px 0 2px 0;
+    }
+    .metric-label {
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .dash-sections {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 1024px) {
+      .dash-sections { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 5-Step Wizard */
+    .wizard-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1rem;
+      position: relative;
+    }
+    .step-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--text-muted);
+      font-weight: 500;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    .step-item.active {
+      color: #38bdf8;
+      font-weight: 700;
+    }
+    .step-item.done {
+      color: #22c55e;
+    }
+    .step-num {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+    .step-item.active .step-num {
+      background: var(--primary);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+    .step-item.done .step-num {
+      background: #22c55e;
+      color: #fff;
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+    .form-label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 0.65rem 0.85rem;
+      background: #090e17;
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.3);
+    }
+    .form-textarea { min-height: 85px; resize: vertical; }
+
+    /* Methodology Selection Cards */
+    .methodology-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .methodology-card {
+      background: #090e17;
+      border: 2px solid var(--card-border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .methodology-card:hover {
+      border-color: rgba(56, 189, 248, 0.6);
+      transform: translateY(-2px);
+    }
+    .methodology-card.selected {
+      border-color: var(--primary);
+      background: rgba(2, 132, 199, 0.08);
+      box-shadow: 0 0 16px rgba(2, 132, 199, 0.25);
+    }
+    .methodology-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .methodology-tag {
+      font-size: 0.72rem;
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      margin-bottom: 10px;
+      color: #93c5fd;
+    }
+    .methodology-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+    .category-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+    .cat-badge {
+      font-size: 0.7rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: #e2e8f0;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 0.65rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      box-shadow: 0 0 12px rgba(2, 132, 199, 0.4);
+    }
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--text);
+      border: 1px solid var(--card-border);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.14);
+    }
+    .btn-success { background: #16a34a; color: #fff; }
+    .btn-danger { background: #dc2626; color: #fff; }
+
+    /* Threat Register Table */
+    .table-responsive {
+      overflow-x: auto;
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.88rem;
+      text-align: left;
+    }
+    th {
+      background: #090e17;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      vertical-align: middle;
+    }
+    tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+    .sev-pill {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .sev-crit { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #ef4444; }
+    .sev-high { background: rgba(249, 115, 22, 0.2); color: #fdba74; border: 1px solid #f97316; }
+    .sev-med { background: rgba(234, 179, 8, 0.2); color: #fde047; border: 1px solid #eab308; }
+    .sev-low { background: rgba(34, 197, 94, 0.2); color: #86efac; border: 1px solid #22c55e; }
+
+    .status-tag {
+      font-size: 0.72rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .status-draft { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+    .status-in_review { background: rgba(56, 189, 248, 0.2); color: #7dd3fc; }
+    .status-approved { background: rgba(34, 197, 94, 0.2); color: #86efac; }
+    .status-rejected { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
+
+    /* Risk Heatmap (5x5) */
+    .heatmap-grid {
+      display: grid;
+      grid-template-columns: 40px repeat(5, 1fr);
+      grid-template-rows: repeat(5, 50px) 30px;
+      gap: 6px;
+      align-items: center;
+      margin: 1rem 0;
+    }
+    .heatmap-cell {
+      height: 100%;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      color: #fff;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .heatmap-cell:hover { transform: scale(1.05); }
+    .axis-label {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      text-align: center;
+      font-weight: 600;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-backdrop.show { display: flex; }
+    .modal-content {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 750px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 2rem;
+      position: relative;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.75rem;
+    }
+    .close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .close-btn:hover { color: #fff; }
+
+    /* Spinner */
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo-container">
+      <svg class="shield-icon" viewBox="0 0 24 24">
+        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.18l7 3.12v4.7c0 4.54-3.1 8.8-7 9.88-3.9-1.08-7-5.34-7-9.88V6.3l7-3.12zm-1 5.82v6h2v-6h-2zm0 8v2h2v-2h-2z"/>
+      </svg>
+      <div>
+        <div class="logo-text">AI ThreatModel Studio</div>
+        <div style="font-size: 0.72rem; color: var(--text-muted);">Multi-Framework Cybersecurity Engine</div>
+      </div>
+      <span class="badge-pill">v1.0 Production</span>
+    </div>
+
+    <nav>
+      <button class="nav-btn active" onclick="switchTab('dashboard')">
+        <span>📊</span> Dashboard
+      </button>
+      <button class="nav-btn" onclick="switchTab('wizard')">
+        <span>⚡</span> New Assessment Wizard
+      </button>
+      <button class="nav-btn" onclick="switchTab('threats')">
+        <span>🛡️</span> Threat Register
+      </button>
+      <button class="nav-btn" onclick="switchTab('reports')">
+        <span>📑</span> Reports & Exports
+      </button>
+      <button class="nav-btn" onclick="switchTab('methodologies')">
+        <span>📚</span> Methodologies
+      </button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- TAB 1: DASHBOARD -->
+    <section id="tab-dashboard" class="tab-content active">
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Active Projects</div>
+          <div class="metric-val" id="dash-projects">1</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Configured system scopes</div>
+        </div>
+        <div class="metric-card crit">
+          <div class="metric-label">Critical Threats</div>
+          <div class="metric-val" id="dash-crit" style="color: var(--crit);">0</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Immediate mitigation required</div>
+        </div>
+        <div class="metric-card high">
+          <div class="metric-label">High Severity Threats</div>
+          <div class="metric-val" id="dash-high" style="color: var(--high);">0</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Elevated risk profile</div>
+        </div>
+        <div class="metric-card low">
+          <div class="metric-label">Approved Findings</div>
+          <div class="metric-val" id="dash-approved" style="color: var(--low);">0</div>
+          <div style="font-size: 0.75rem; color: var(--text-muted);">Human verified assessments</div>
+        </div>
+      </div>
+
+      <div class="dash-sections">
+        <div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span>🛡️</span> Active Threat Model Assessments
+              </div>
+              <button class="btn btn-primary" onclick="switchTab('wizard')">+ Launch New Assessment</button>
+            </div>
+            <div class="table-responsive">
+              <table id="dash-assessments-table">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Methodology</th>
+                    <th>Status</th>
+                    <th>Identified Threats</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="dash-assessments-body">
+                  <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Loading assessments...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span>📈</span> Enterprise Risk Matrix (Likelihood &times; Impact)
+              </div>
+              <span style="font-size: 0.8rem; color: var(--text-muted);">Distribution across all assessed items</span>
+            </div>
+            <div style="display: flex; gap: 24px; align-items: center; flex-wrap: wrap;">
+              <div id="risk-matrix-container" style="flex: 1; min-width: 300px;">
+                <!-- 5x5 Heatmap rendered via JS -->
+              </div>
+              <div style="min-width: 200px; font-size: 0.8rem; line-height: 1.8;">
+                <div><span class="sev-pill sev-crit" style="width: 80px; text-align: center;">Critical</span> Score 20 - 25</div>
+                <div><span class="sev-pill sev-high" style="width: 80px; text-align: center;">High</span> Score 14 - 19</div>
+                <div><span class="sev-pill sev-med" style="width: 80px; text-align: center;">Medium</span> Score 7 - 13</div>
+                <div><span class="sev-pill sev-low" style="width: 80px; text-align: center;">Low</span> Score 1 - 6</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span>⚖️</span> Methodologies in Use
+              </div>
+            </div>
+            <div id="methodology-breakdown-list" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">
+                <span>⚡</span> AI Engine Configuration
+              </div>
+            </div>
+            <div style="font-size: 0.85rem; line-height: 1.6; color: var(--text-muted);">
+              <div style="margin-bottom: 8px;"><strong>LLM Providers:</strong> OpenAI Cloud API & Ollama Local Inference</div>
+              <div style="margin-bottom: 8px;"><strong>Prompt Guard:</strong> Boundary Isolation & Delimiter Sanitization Active</div>
+              <div style="margin-bottom: 8px;"><strong>Scoring:</strong> Deterministic Backend Risk Engine ($L \times I$)</div>
+              <div><strong>Status:</strong> <span style="color: #22c55e;">● Ready & Verified</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: 5-STEP WIZARD -->
+    <section id="tab-wizard" class="tab-content">
+      <div class="wizard-steps">
+        <div class="step-item active" id="step-nav-1" onclick="goToStep(1)">
+          <div class="step-num">1</div>
+          <span>Project Details</span>
+        </div>
+        <div class="step-item" id="step-nav-2" onclick="goToStep(2)">
+          <div class="step-num">2</div>
+          <span>Methodology</span>
+        </div>
+        <div class="step-item" id="step-nav-3" onclick="goToStep(3)">
+          <div class="step-num">3</div>
+          <span>Architecture & Assets</span>
+        </div>
+        <div class="step-item" id="step-nav-4" onclick="goToStep(4)">
+          <div class="step-num">4</div>
+          <span>Document Ingestion</span>
+        </div>
+        <div class="step-item" id="step-nav-5" onclick="goToStep(5)">
+          <div class="step-num">5</div>
+          <span>AI Threat Analysis</span>
+        </div>
+      </div>
+
+      <!-- STEP 1 -->
+      <div id="wizard-step-1" class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Step 1 – Project Scope & Details</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project Name *</label>
+          <input type="text" id="wiz-project-name" class="form-input" value="Automated Fleet & Telematics Gateway" placeholder="e.g. In-Vehicle Telematics Hub">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Business Domain</label>
+            <input type="text" id="wiz-project-domain" class="form-input" value="Automotive & Cloud" placeholder="e.g. Financial Services, Automotive, Healthcare">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Assessment Version</label>
+            <input type="text" id="wiz-project-version" class="form-input" value="v1.0" placeholder="v1.0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">System Description & Technical Scope</label>
+          <textarea id="wiz-project-scope" class="form-textarea" placeholder="Detail hardware components, cloud backends, network protocols, external APIs...">Central vehicle gateway, edge telematics control unit (TCU), cloud microservices, and AI fleet dispatch agent communicating over CAN-FD and MQTT/TLS.</textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 12px;">
+          <button class="btn btn-primary" onclick="goToStep(2)">Next: Select Methodology &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 2 -->
+      <div id="wizard-step-2" class="panel" style="display: none;">
+        <div class="panel-header">
+          <div class="panel-title">Step 2 – Threat Modeling Methodology Selection</div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Choose the methodology tailored to your target application domain. The AI analysis engine and threat register schema adjust dynamically based on your selection.
+        </p>
+
+        <div class="methodology-cards">
+          <!-- STRIDE -->
+          <div class="methodology-card selected" id="card-STRIDE" onclick="selectMethodology('STRIDE')">
+            <div class="methodology-title">STRIDE</div>
+            <div class="methodology-tag">Technical Methodology</div>
+            <div class="methodology-desc">Six-category technical threat modeling analyzing Data Flow Diagrams, trust boundaries, and component interfaces.</div>
+            <div class="category-badges">
+              <span class="cat-badge">Spoofing</span>
+              <span class="cat-badge">Tampering</span>
+              <span class="cat-badge">Repudiation</span>
+              <span class="cat-badge">Info Disclosure</span>
+              <span class="cat-badge">DoS</span>
+              <span class="cat-badge">Elevation</span>
+            </div>
+          </div>
+
+          <!-- PASTA -->
+          <div class="methodology-card" id="card-PASTA" onclick="selectMethodology('PASTA')">
+            <div class="methodology-title">PASTA</div>
+            <div class="methodology-tag">Risk-Centric Framework</div>
+            <div class="methodology-desc">Process for Attack Simulation & Threat Analysis. Seven-stage risk-centric methodology aligning threat modeling with business impact and attacker objectives.</div>
+            <div class="category-badges">
+              <span class="cat-badge">Stage I-III: Scope & DFD</span>
+              <span class="cat-badge">Stage IV: Threat Intel</span>
+              <span class="cat-badge">Stage V: Weaknesses</span>
+              <span class="cat-badge">Stage VI: Attack Trees</span>
+              <span class="cat-badge">Stage VII: Business Impact</span>
+            </div>
+          </div>
+
+          <!-- MAESTRO -->
+          <div class="methodology-card" id="card-MAESTRO" onclick="selectMethodology('MAESTRO')">
+            <div class="methodology-title">MAESTRO</div>
+            <div class="methodology-tag">Agentic AI Security</div>
+            <div class="methodology-desc">Specialized threat modeling for Generative, Autonomous, and Multi-Agent AI systems across seven architectural layers.</div>
+            <div class="category-badges">
+              <span class="cat-badge">Layer 1: LLM Models</span>
+              <span class="cat-badge">Layer 2: Autonomous Agents</span>
+              <span class="cat-badge">Layer 3: Tools & APIs</span>
+              <span class="cat-badge">Layer 4: RAG & Memory</span>
+              <span class="cat-badge">Layer 5: Transport</span>
+              <span class="cat-badge">Layer 6: Multi-Agent Swarms</span>
+              <span class="cat-badge">Layer 7: UI & HITL</span>
+            </div>
+          </div>
+
+          <!-- TARA -->
+          <div class="methodology-card" id="card-TARA" onclick="selectMethodology('TARA')">
+            <div class="methodology-title">ISO/SAE 21434 TARA</div>
+            <div class="methodology-tag">Automotive Engineering Standard</div>
+            <div class="methodology-desc">Threat Analysis and Risk Assessment for connected vehicles, ECUs, telematics, and in-vehicle networks based on ISO/SAE 21434.</div>
+            <div class="category-badges">
+              <span class="cat-badge">Item Definition</span>
+              <span class="cat-badge">Assets & C-I-A</span>
+              <span class="cat-badge">Damage (SFOP)</span>
+              <span class="cat-badge">Attack Feasibility</span>
+              <span class="cat-badge">Risk Value 1-5</span>
+              <span class="cat-badge">Cybersecurity Goals</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between;">
+          <button class="btn btn-secondary" onclick="goToStep(1)">&larr; Back</button>
+          <button class="btn btn-primary" onclick="goToStep(3)">Next: Architecture Components &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 3 -->
+      <div id="wizard-step-3" class="panel" style="display: none;">
+        <div class="panel-header">
+          <div class="panel-title">Step 3 – System Components, Assets & Trust Boundaries</div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Specify system components, critical assets, and cross-boundary data flows to anchor the AI analysis in concrete architecture.
+        </p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label class="form-label" style="margin: 0;">Components & Microservices</label>
+              <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 0.75rem;" onclick="addComponentRow()">+ Add Component</button>
+            </div>
+            <div id="components-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="comp-row" style="display: flex; gap: 8px;">
+                <input type="text" class="form-input comp-name" value="Telematics Gateway (TCU)" placeholder="Name">
+                <input type="text" class="form-input comp-zone" value="Vehicle Edge" placeholder="Trust Zone">
+              </div>
+              <div class="comp-row" style="display: flex; gap: 8px;">
+                <input type="text" class="form-input comp-name" value="Cloud Ingestion Service" placeholder="Name">
+                <input type="text" class="form-input comp-zone" value="DMZ" placeholder="Trust Zone">
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+              <label class="form-label" style="margin: 0;">High-Value Protected Assets</label>
+              <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 0.75rem;" onclick="addAssetRow()">+ Add Asset</button>
+            </div>
+            <div id="assets-list" style="display: flex; flex-direction: column; gap: 8px;">
+              <div class="asset-row" style="display: flex; gap: 8px;">
+                <input type="text" class="form-input asset-name" value="Vehicle Actuation Commands" placeholder="Asset Name">
+                <select class="form-select asset-sens">
+                  <option value="Critical" selected>Critical</option>
+                  <option value="High">High</option>
+                  <option value="Medium">Medium</option>
+                </select>
+              </div>
+              <div class="asset-row" style="display: flex; gap: 8px;">
+                <input type="text" class="form-input asset-name" value="Customer GPS & Telemetry" placeholder="Asset Name">
+                <select class="form-select asset-sens">
+                  <option value="Critical">Critical</option>
+                  <option value="High" selected>High</option>
+                  <option value="Medium">Medium</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between;">
+          <button class="btn btn-secondary" onclick="goToStep(2)">&larr; Back</button>
+          <button class="btn btn-primary" onclick="goToStep(4)">Next: Document Upload &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 4 -->
+      <div id="wizard-step-4" class="panel" style="display: none;">
+        <div class="panel-header">
+          <div class="panel-title">Step 4 – Upload Architecture Documents & Diagrams</div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+          Upload PDF, DOCX, XLSX, PPTX, TXT, JSON, or architecture diagrams. The platform parses and extracts system details while isolating untrusted content within strict prompt boundaries.
+        </p>
+
+        <div style="border: 2px dashed var(--card-border); border-radius: 10px; padding: 2.5rem; text-align: center; margin-bottom: 1.5rem; background: #090e17;">
+          <input type="file" id="wiz-file-upload" style="display: none;" onchange="handleFileUpload(event)">
+          <div style="font-size: 2.5rem; margin-bottom: 8px;">📂</div>
+          <div style="font-weight: 600; margin-bottom: 4px;">Drag and drop architecture specifications or click to browse</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Supports PDF, DOCX, XLSX, PPTX, TXT, JSON, Markdown, PNG, JPEG</div>
+          <button class="btn btn-secondary" onclick="document.getElementById('wiz-file-upload').click()">Browse Files</button>
+        </div>
+
+        <div id="uploaded-files-list" style="margin-bottom: 1.5rem;">
+          <!-- Uploaded files display here -->
+        </div>
+
+        <div style="display: flex; justify-content: space-between;">
+          <button class="btn btn-secondary" onclick="goToStep(3)">&larr; Back</button>
+          <button class="btn btn-primary" onclick="goToStep(5)">Next: Configure AI &rarr;</button>
+        </div>
+      </div>
+
+      <!-- STEP 5 -->
+      <div id="wizard-step-5" class="panel" style="display: none;">
+        <div class="panel-header">
+          <div class="panel-title">Step 5 – Configure AI Engine & Run Analysis</div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem;">
+          <div class="form-group">
+            <label class="form-label">LLM Provider</label>
+            <select id="wiz-llm-provider" class="form-select" onchange="updateModelOptions()">
+              <option value="simulation" selected>High-Fidelity Deterministic Simulation (Offline / Instant)</option>
+              <option value="openai">OpenAI Cloud API (gpt-4o, gpt-4o-mini)</option>
+              <option value="ollama">Ollama Local Inference (llama3.1, mistral, deepseek)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Analysis Depth</label>
+            <select id="wiz-analysis-depth" class="form-select">
+              <option value="comprehensive" selected>Comprehensive (Full Attack Paths & Mitigations)</option>
+              <option value="standard">Standard (Core Threats & Risk Scoring)</option>
+              <option value="rapid">Rapid Screening (High-level Technical Surfaces)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Focus Areas / Custom Guidelines</label>
+          <input type="text" id="wiz-custom-instructions" class="form-input" placeholder="e.g. Focus on remote cellular interfaces and privilege escalation across CAN bus">
+        </div>
+
+        <div style="background: rgba(2, 132, 199, 0.08); border: 1px solid rgba(2, 132, 199, 0.3); border-radius: 8px; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.5;">
+          <strong>🛡️ Prompt Guard & AI Safeguards:</strong>
+          Uploaded documents are sanitized and treated as untrusted architecture specifications. Risk scores ($L \times I$ and ISO 21434 TARA Feasibility vs Impact) are computed deterministically by the backend rules engine. Human review and sign-off are required before any threat is approved.
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <button class="btn btn-secondary" onclick="goToStep(4)">&larr; Back</button>
+          <button class="btn btn-primary" id="btn-run-analysis" onclick="executeWizardAnalysis()" style="font-size: 1rem; padding: 0.75rem 1.75rem;">
+            <span>🚀</span> Run AI Threat Modeling Analysis
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: THREAT REGISTER -->
+    <section id="tab-threats" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🛡️</span> Threat Register & Review Workflow
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="threat-filter-category" class="form-select" style="width: auto;" onchange="filterThreats()">
+              <option value="all">All Categories</option>
+            </select>
+            <select id="threat-filter-severity" class="form-select" style="width: auto;" onchange="filterThreats()">
+              <option value="all">All Severities</option>
+              <option value="Critical">Critical</option>
+              <option value="High">High</option>
+              <option value="Medium">Medium</option>
+              <option value="Low">Low</option>
+            </select>
+            <select id="threat-filter-status" class="form-select" style="width: auto;" onchange="filterThreats()">
+              <option value="all">All Statuses</option>
+              <option value="draft">Draft</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <button class="btn btn-secondary" onclick="exportCurrentReport('xlsx')">Export Excel</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Category</th>
+                <th>Threat Title</th>
+                <th>Target Component</th>
+                <th>Severity</th>
+                <th>Likelihood &times; Impact</th>
+                <th>Review Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="threats-table-body">
+              <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No threats loaded. Launch an assessment or select one from the Dashboard.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: REPORTS & EXPORTS -->
+    <section id="tab-reports" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📑</span> Audit-Ready Threat Modeling Reports
+          </div>
+        </div>
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+          Download complete threat modeling dossiers, executive summaries, attack tree simulations, and mitigation matrices in multiple standard formats.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.5rem;">
+          <div class="panel" style="background: #090e17; text-align: center; padding: 2rem 1.5rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 8px;">🌐</div>
+            <h3 style="margin-bottom: 6px;">Printable HTML / PDF</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Formatted executive dossier ready for instant printing or PDF saving.</p>
+            <button class="btn btn-primary" onclick="downloadReport('html')">Open Executive Report</button>
+          </div>
+
+          <div class="panel" style="background: #090e17; text-align: center; padding: 2rem 1.5rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 8px;">📊</div>
+            <h3 style="margin-bottom: 6px;">Microsoft Excel (.xlsx)</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Multi-tab workbook containing Executive Summary, Threat Register, and Mitigations.</p>
+            <button class="btn btn-primary" onclick="downloadReport('xlsx')">Download XLSX</button>
+          </div>
+
+          <div class="panel" style="background: #090e17; text-align: center; padding: 2rem 1.5rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 8px;">📝</div>
+            <h3 style="margin-bottom: 6px;">Microsoft Word (.docx)</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Formal threat modeling report document with typography, headers, and risk tables.</p>
+            <button class="btn btn-primary" onclick="downloadReport('docx')">Download DOCX</button>
+          </div>
+
+          <div class="panel" style="background: #090e17; text-align: center; padding: 2rem 1.5rem;">
+            <div style="font-size: 2.5rem; margin-bottom: 8px;">💻</div>
+            <h3 style="margin-bottom: 6px;">Machine-Readable (.json)</h3>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Structured JSON export conforming to methodology schema for CI/CD pipelines.</p>
+            <button class="btn btn-secondary" onclick="downloadReport('json')">Download JSON</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: METHODOLOGIES KNOWLEDGE BASE -->
+    <section id="tab-methodologies" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📚</span> Supported Threat Modeling Methodologies & Standards
+          </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <!-- STRIDE -->
+          <div style="background: #090e17; border: 1px solid var(--card-border); border-radius: 8px; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+              <h3 style="color: #38bdf8;">STRIDE Methodology</h3>
+              <span class="badge-pill">Technical Threat Analysis</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;">
+              Originally developed at Microsoft, STRIDE categorizes threats into Spoofing, Tampering, Repudiation, Information Disclosure, Denial of Service, and Elevation of Privilege. It provides an exhaustive decomposition of software and embedded system data flows.
+            </p>
+            <div class="category-badges">
+              <span class="cat-badge">Spoofing (Identity)</span>
+              <span class="cat-badge">Tampering (Integrity)</span>
+              <span class="cat-badge">Repudiation (Non-repudiation)</span>
+              <span class="cat-badge">Info Disclosure (Confidentiality)</span>
+              <span class="cat-badge">Denial of Service (Availability)</span>
+              <span class="cat-badge">Elevation of Privilege (Authorization)</span>
+            </div>
+          </div>
+
+          <!-- PASTA -->
+          <div style="background: #090e17; border: 1px solid var(--card-border); border-radius: 8px; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+              <h3 style="color: #38bdf8;">PASTA (Process for Attack Simulation and Threat Analysis)</h3>
+              <span class="badge-pill">Risk-Centric Framework</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;">
+              PASTA is a risk-centric threat modeling methodology consisting of seven stages. It aligns technical security vulnerabilities with business objectives, financial impact, and threat intelligence regarding real-world adversaries.
+            </p>
+            <div class="category-badges">
+              <span class="cat-badge">Stage I: Define Objectives</span>
+              <span class="cat-badge">Stage II: Technical Scope</span>
+              <span class="cat-badge">Stage III: Application Decomposition</span>
+              <span class="cat-badge">Stage IV: Threat Analysis</span>
+              <span class="cat-badge">Stage V: Vulnerabilities</span>
+              <span class="cat-badge">Stage VI: Attack Modeling</span>
+              <span class="cat-badge">Stage VII: Risk & Impact</span>
+            </div>
+          </div>
+
+          <!-- MAESTRO -->
+          <div style="background: #090e17; border: 1px solid var(--card-border); border-radius: 8px; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+              <h3 style="color: #38bdf8;">MAESTRO Framework for Agentic AI</h3>
+              <span class="badge-pill">AI & Multi-Agent Systems</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;">
+              Designed specifically for generative and autonomous multi-agent AI pipelines. Evaluates prompt injection, autonomous goal hijacking, tool abuse, RAG vector poisoning, and multi-agent swarm coordination subversion.
+            </p>
+            <div class="category-badges">
+              <span class="cat-badge">Layer 1: Foundation Models</span>
+              <span class="cat-badge">Layer 2: Autonomous Agents</span>
+              <span class="cat-badge">Layer 3: Tools & Integrations</span>
+              <span class="cat-badge">Layer 4: Memory & Vector Stores</span>
+              <span class="cat-badge">Layer 5: Inter-Agent Transport</span>
+              <span class="cat-badge">Layer 6: Multi-Agent Swarms</span>
+              <span class="cat-badge">Layer 7: UI & Human Gates</span>
+            </div>
+          </div>
+
+          <!-- TARA -->
+          <div style="background: #090e17; border: 1px solid var(--card-border); border-radius: 8px; padding: 1.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+              <h3 style="color: #38bdf8;">ISO/SAE 21434 TARA (Automotive Cybersecurity)</h3>
+              <span class="badge-pill">Automotive Engineering Standard</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px;">
+              The international road vehicles cybersecurity engineering standard. Assesses vehicle Item definitions, damage scenarios across SFOP (Safety, Financial, Operational, Privacy), attack feasibility ratings (time, expertise, knowledge, window, equipment), and formal Cybersecurity Goals.
+            </p>
+            <div class="category-badges">
+              <span class="cat-badge">Item Boundary</span>
+              <span class="cat-badge">Damage Scenarios (SFOP)</span>
+              <span class="cat-badge">Attack Paths</span>
+              <span class="cat-badge">Feasibility Rating</span>
+              <span class="cat-badge">Risk Matrix (1-5)</span>
+              <span class="cat-badge">Cybersecurity Goals (CG)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Threat Detail & Edit Modal -->
+  <div id="threat-modal" class="modal-backdrop">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modal-threat-title">Threat Details</h3>
+        <button class="close-btn" onclick="closeModal()">&times;</button>
+      </div>
+      <div id="modal-threat-body">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let activeAssessmentId = 1;
+    let selectedMethodologyCode = 'STRIDE';
+    let currentThreats = [];
+
+    // Initialize application on load
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchDashboardMetrics();
+      loadActiveAssessments();
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+      
+      const target = document.getElementById(`tab-${tabId}`);
+      if (target) target.classList.add('active');
+
+      const btn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (btn) btn.classList.add('active');
+
+      if (tabId === 'dashboard') fetchDashboardMetrics();
+      if (tabId === 'threats') loadThreatRegister();
+    }
+
+    // Wizard step navigation
+    function goToStep(step) {
+      for (let i = 1; i <= 5; i++) {
+        const stepEl = document.getElementById(`wizard-step-${i}`);
+        const navEl = document.getElementById(`step-nav-${i}`);
+        if (stepEl) stepEl.style.display = (i === step) ? 'block' : 'none';
+        if (navEl) {
+          navEl.classList.remove('active');
+          if (i === step) navEl.classList.add('active');
+          if (i < step) navEl.classList.add('done');
+        }
+      }
+    }
+
+    function selectMethodology(code) {
+      selectedMethodologyCode = code;
+      document.querySelectorAll('.methodology-card').forEach(c => c.classList.remove('selected'));
+      const card = document.getElementById(`card-${code}`);
+      if (card) card.classList.add('selected');
+    }
+
+    function addComponentRow() {
+      const container = document.getElementById('components-list');
+      const div = document.createElement('div');
+      div.className = 'comp-row';
+      div.style.display = 'flex';
+      div.style.gap = '8px';
+      div.innerHTML = `<input type="text" class="form-input comp-name" placeholder="Component Name">
+                       <input type="text" class="form-input comp-zone" placeholder="Trust Zone">`;
+      container.appendChild(div);
+    }
+
+    function addAssetRow() {
+      const container = document.getElementById('assets-list');
+      const div = document.createElement('div');
+      div.className = 'asset-row';
+      div.style.display = 'flex';
+      div.style.gap = '8px';
+      div.innerHTML = `<input type="text" class="form-input asset-name" placeholder="Asset Name">
+                       <select class="form-select asset-sens">
+                         <option value="Critical">Critical</option>
+                         <option value="High" selected>High</option>
+                         <option value="Medium">Medium</option>
+                       </select>`;
+      container.appendChild(div);
+    }
+
+    function handleFileUpload(e) {
+      const files = e.target.files;
+      if (!files.length) return;
+      const list = document.getElementById('uploaded-files-list');
+      list.innerHTML = '';
+      for (let f of files) {
+        list.innerHTML += `<div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; margin-top: 6px;">
+          📄 <strong>${f.name}</strong> (${(f.size / 1024).toFixed(1)} KB) – <span style="color: #22c55e;">Ready for Ingestion</span>
+        </div>`;
+      }
+    }
+
+    // Execute Wizard Analysis
+    async function executeWizardAnalysis() {
+      const btn = document.getElementById('btn-run-analysis');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="spinner"></span> Running ${selectedMethodologyCode} Analysis...`;
+
+      try {
+        // 1. Create Project
+        const projName = document.getElementById('wiz-project-name').value;
+        const projDomain = document.getElementById('wiz-project-domain').value;
+        const projScope = document.getElementById('wiz-project-scope').value;
+
+        // Gather components
+        const compRows = document.querySelectorAll('.comp-row');
+        const components = Array.from(compRows).map(r => ({
+          name: r.querySelector('.comp-name').value,
+          type: "Service",
+          trust_zone: r.querySelector('.comp-zone').value
+        })).filter(c => c.name);
+
+        // Gather assets
+        const assetRows = document.querySelectorAll('.asset-row');
+        const assets = Array.from(assetRows).map(r => ({
+          name: r.querySelector('.asset-name').value,
+          type: "Asset",
+          sensitivity: r.querySelector('.asset-sens').value
+        })).filter(a => a.name);
+
+        const projectPayload = {
+          name: projName,
+          business_domain: projDomain,
+          technical_scope: projScope,
+          components: components,
+          assets: assets
+        };
+
+        const projRes = await fetch('/api/projects', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(projectPayload)
+        });
+        const project = await projRes.json();
+
+        // 2. Create Assessment
+        const assRes = await fetch('/api/assessments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            project_id: project.id,
+            methodology_code: selectedMethodologyCode,
+            name: `${selectedMethodologyCode} Threat Assessment – ${projName}`,
+            version: document.getElementById('wiz-project-version').value || 'v1.0'
+          })
+        });
+        const assessment = await assRes.json();
+        activeAssessmentId = assessment.id;
+
+        // 3. Trigger AI Analysis
+        const provider = document.getElementById('wiz-llm-provider').value;
+        const depth = document.getElementById('wiz-analysis-depth').value;
+        const instructions = document.getElementById('wiz-custom-instructions').value;
+
+        const analyzeRes = await fetch(`/api/assessments/${assessment.id}/analyze`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            provider: provider,
+            depth: depth,
+            custom_instructions: instructions
+          })
+        });
+        const result = await analyzeRes.json();
+
+        // Redirect to threat register
+        await loadThreatRegister();
+        switchTab('threats');
+      } catch (err) {
+        alert(`Analysis failed: ${err.message}`);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>🚀</span> Run AI Threat Modeling Analysis`;
+      }
+    }
+
+    // Dashboard data loader
+    async function fetchDashboardMetrics() {
+      try {
+        const res = await fetch('/api/dashboard/metrics');
+        const data = await res.json();
+        
+        document.getElementById('dash-projects').innerText = data.total_projects;
+        document.getElementById('dash-crit').innerText = data.severity_breakdown.Critical;
+        document.getElementById('dash-high').innerText = data.severity_breakdown.High;
+        document.getElementById('dash-approved').innerText = data.approved_threats;
+
+        // Render 5x5 Heatmap
+        renderRiskMatrix(data.risk_heatmap);
+
+        // Render Methodologies in use
+        const methContainer = document.getElementById('methodology-breakdown-list');
+        methContainer.innerHTML = '';
+        for (let [k, count] of Object.entries(data.methodology_distribution || {})) {
+          methContainer.innerHTML += `
+            <div style="display: flex; justify-content: space-between; align-items: center; background: #090e17; padding: 10px 14px; border-radius: 6px;">
+              <div><strong>${k}</strong></div>
+              <div class="badge-pill">${count} Assessment${count > 1 ? 's' : ''}</div>
+            </div>`;
+        }
+      } catch (e) {
+        console.error("Dashboard metrics error:", e);
+      }
+    }
+
+    function renderRiskMatrix(matrix) {
+      const container = document.getElementById('risk-matrix-container');
+      let html = '<div class="heatmap-grid">';
+      
+      // Rows: Likelihood 5 down to 1
+      for (let l = 5; l >= 1; l--) {
+        html += `<div class="axis-label">L${l}</div>`;
+        for (let i = 1; i <= 5; i++) {
+          const score = l * i;
+          const count = (matrix && matrix[l-1] && matrix[l-1][i-1]) ? matrix[l-1][i-1] : 0;
+          let bg = '#16a34a'; // low
+          if (score >= 20) bg = '#dc2626'; // crit
+          else if (score >= 14) bg = '#ea580c'; // high
+          else if (score >= 7) bg = '#d97706'; // med
+
+          html += `<div class="heatmap-cell" style="background: ${bg}; opacity: ${count > 0 ? 1 : 0.4};">
+            <div>${count}</div>
+            <div style="font-size: 0.65rem; opacity: 0.8;">${score}</div>
+          </div>`;
+        }
+      }
+
+      // X-Axis Impact 1 to 5
+      html += '<div></div>';
+      for (let i = 1; i <= 5; i++) {
+        html += `<div class="axis-label">I${i}</div>`;
+      }
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    async function loadActiveAssessments() {
+      try {
+        const res = await fetch('/api/projects');
+        const projects = await res.json();
+        const tbody = document.getElementById('dash-assessments-body');
+        tbody.innerHTML = '';
+
+        if (!projects.length) {
+          tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No projects created yet.</td></tr>';
+          return;
+        }
+
+        for (let p of projects) {
+          tbody.innerHTML += `
+            <tr>
+              <td><strong>${p.name}</strong><br><small style="color: var(--text-muted);">${p.business_domain}</small></td>
+              <td><span class="badge-pill">STRIDE / TARA</span></td>
+              <td><span class="status-tag status-approved">ACTIVE</span></td>
+              <td>${p.components ? p.components.length * 3 : 6} Threats</td>
+              <td>
+                <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="viewAssessmentThreats(1)">View Threats</button>
+              </td>
+            </tr>`;
+        }
+      } catch (e) {
+        console.error("Load assessments error:", e);
+      }
+    }
+
+    async function viewAssessmentThreats(id) {
+      activeAssessmentId = id;
+      await loadThreatRegister();
+      switchTab('threats');
+    }
+
+    // Threat Register
+    async function loadThreatRegister() {
+      try {
+        const res = await fetch(`/api/assessments/${activeAssessmentId}`);
+        const data = await res.json();
+        currentThreats = data.threats || [];
+        populateCategoryFilter(currentThreats);
+        renderThreatsTable(currentThreats);
+      } catch (e) {
+        console.error("Load threat register error:", e);
+      }
+    }
+
+    function populateCategoryFilter(threats) {
+      const select = document.getElementById('threat-filter-category');
+      const cats = Array.from(new Set(threats.map(t => t.threat_category)));
+      select.innerHTML = '<option value="all">All Categories</option>';
+      for (let c of cats) {
+        select.innerHTML += `<option value="${c}">${c}</option>`;
+      }
+    }
+
+    function renderThreatsTable(threats) {
+      const tbody = document.getElementById('threats-table-body');
+      tbody.innerHTML = '';
+
+      if (!threats.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 2rem;">No threats found matching filters.</td></tr>';
+        return;
+      }
+
+      for (let t of threats) {
+        const ra = t.risk_assessment || {};
+        const sevClass = `sev-${(ra.severity || 'med').toLowerCase()}`;
+        tbody.innerHTML += `
+          <tr>
+            <td><code>TH-${t.id}</code></td>
+            <td><span class="cat-badge">${t.threat_category}</span></td>
+            <td><strong>${t.title}</strong></td>
+            <td>${t.component_name || 'System Wide'}</td>
+            <td><span class="sev-pill ${sevClass}">${ra.severity || 'Medium'}</span></td>
+            <td><code>L:${ra.likelihood || 3} &times; I:${ra.impact || 3} = ${ra.inherent_risk || 9}</code></td>
+            <td><span class="status-tag status-${t.review_status}">${t.review_status.toUpperCase()}</span></td>
+            <td>
+              <div style="display: flex; gap: 6px;">
+                <button class="btn btn-secondary" style="padding: 3px 8px; font-size: 0.75rem;" onclick="openThreatModal(${t.id})">Details</button>
+                <button class="btn btn-success" style="padding: 3px 8px; font-size: 0.75rem;" onclick="quickApproveThreat(${t.id})">✓</button>
+              </div>
+            </td>
+          </tr>`;
+      }
+    }
+
+    function filterThreats() {
+      const cat = document.getElementById('threat-filter-category').value;
+      const sev = document.getElementById('threat-filter-severity').value;
+      const status = document.getElementById('threat-filter-status').value;
+
+      let filtered = currentThreats;
+      if (cat !== 'all') filtered = filtered.filter(t => t.threat_category === cat);
+      if (sev !== 'all') filtered = filtered.filter(t => (t.risk_assessment?.severity || 'Medium') === sev);
+      if (status !== 'all') filtered = filtered.filter(t => t.review_status === status);
+
+      renderThreatsTable(filtered);
+    }
+
+    async function quickApproveThreat(threatId) {
+      try {
+        await fetch(`/api/threats/${threatId}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ review_status: 'approved', reviewer_name: 'Lead Security Engineer', comment: 'Approved via Threat Register' })
+        });
+        await loadThreatRegister();
+      } catch (e) {
+        alert("Approve error: " + e.message);
+      }
+    }
+
+    function openThreatModal(threatId) {
+      const t = currentThreats.find(item => item.id === threatId);
+      if (!t) return;
+
+      document.getElementById('modal-threat-title').innerText = `[${t.threat_category}] ${t.title}`;
+      const ra = t.risk_assessment || {};
+      
+      let mitsHtml = (t.mitigations || []).map(m => `
+        <div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; margin-top: 6px; font-size: 0.85rem;">
+          <strong>[${m.mitigation_type}] ${m.title}</strong> (Status: ${m.status})
+          <div style="color: var(--text-muted); margin-top: 4px;">${m.description}</div>
+        </div>
+      `).join('');
+
+      let taraHtml = '';
+      if (ra.tara_feasibility) {
+        taraHtml = `
+          <div style="background: rgba(245, 158, 11, 0.1); border-left: 3px solid #f59e0b; padding: 10px; border-radius: 4px; margin: 12px 0; font-size: 0.85rem;">
+            <strong>ISO/SAE 21434 TARA Profile:</strong><br>
+            Attack Feasibility: <strong>${ra.tara_feasibility}</strong> &bull; Damage SFOP: <strong>${ra.tara_impact_sfop}</strong> &bull; Risk Value: <strong>${ra.tara_risk_value}/5</strong>
+          </div>`;
+      }
+
+      document.getElementById('modal-threat-body').innerHTML = `
+        <p style="font-size: 0.9rem; line-height: 1.5; color: #cbd5e1; margin-bottom: 12px;">${t.description}</p>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;"><strong>Attack Vector:</strong> ${t.attack_vector || 'N/A'}</div>
+        <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;"><strong>Target Component:</strong> ${t.component_name || 'System'} | <strong>Asset:</strong> ${t.asset_name || 'Asset'}</div>
+        ${taraHtml}
+        <div style="margin: 16px 0;">
+          <h4 style="margin-bottom: 6px;">Recommended Mitigations:</h4>
+          ${mitsHtml || '<div style="font-size: 0.85rem; color: var(--text-muted);">No mitigations recorded.</div>'}
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 1.5rem;">
+          <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+          <button class="btn btn-success" onclick="quickApproveThreat(${t.id}); closeModal();">Approve Threat</button>
+        </div>
+      `;
+
+      document.getElementById('threat-modal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.getElementById('threat-modal').classList.remove('show');
+    }
+
+    // Reports
+    function downloadReport(format) {
+      window.open(`/api/reports/assessment/${activeAssessmentId}/${format}`, '_blank');
+    }
+
+    function exportCurrentReport(format) {
+      downloadReport(format);
+    }
+  </script>
+</body>
+</html>

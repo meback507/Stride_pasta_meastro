@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI ThreatModel Studio – Connected Autonomous Vehicle Subsystem</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 32px; background: #f8fafc; color: #1e293b; }
+        .container { max-width: 1000px; margin: 0 auto; background: #ffffff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .header { border-bottom: 2px solid #0284c7; padding-bottom: 20px; margin-bottom: 28px; display: flex; justify-content: space-between; align-items: flex-start; }
+        .header h1 { margin: 0; color: #0f172a; font-size: 26px; }
+        .badge { background: #e0f2fe; color: #0369a1; padding: 4px 10px; border-radius: 6px; font-weight: 600; font-size: 13px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin: 24px 0; }
+        .stat-card { background: #f1f5f9; padding: 16px; border-radius: 8px; text-align: center; border-left: 4px solid #0284c7; }
+        .stat-card.crit { border-left-color: #dc2626; }
+        .stat-card.high { border-left-color: #ea580c; }
+        .stat-val { font-size: 28px; font-weight: 700; color: #0f172a; }
+        .stat-lbl { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px; }
+        .threat-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 20px; background: #ffffff; page-break-inside: avoid; }
+        .threat-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .category-pill { font-size: 11px; font-weight: 700; text-transform: uppercase; background: #ede9fe; color: #6d28d9; padding: 2px 8px; border-radius: 4px; }
+        .severity-badge { color: #ffffff; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 13px; }
+        .meta-line { font-size: 12px; color: #64748b; margin-top: 4px; }
+        .status-badge { background: #dcfce7; color: #15803d; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 11px; }
+        .threat-desc { font-size: 14px; line-height: 1.5; color: #334155; margin: 8px 0; }
+        .threat-vector { font-size: 13px; color: #475569; background: #f8fafc; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; }
+        .tara-box { background: #fffbeb; border-left: 3px solid #f59e0b; padding: 8px 12px; font-size: 13px; margin-bottom: 12px; }
+        .mitigation-section { background: #f8fafc; padding: 12px 16px; border-radius: 6px; font-size: 13px; }
+        .mitigation-section ul { margin: 6px 0 0 0; padding-left: 20px; }
+        .mitigation-section li { margin-bottom: 6px; }
+        @media print { body { background: #fff; padding: 0; } .container { box-shadow: none; border-radius: 0; padding: 0; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>Connected Autonomous Vehicle Subsystem</h1>
+                <p style="margin: 6px 0; color: #475569;">Business Domain: <strong>Automotive Engineering</strong> &bull; Methodology: <span class="badge">MAESTRO Agentic AI Threat Modeling</span></p>
+            </div>
+            <div style="text-align: right;">
+                <span class="badge">AI ThreatModel Studio 1.0</span>
+                <p style="margin: 6px 0; font-size: 12px; color: #64748b;">Report Date: 2026-11-12 06:51:31 UTC</p>
+            </div>
+        </div>
+
+        <h2>Executive Risk Summary</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-val">6</div>
+                <div class="stat-lbl">Total Threats</div>
+            </div>
+            <div class="stat-card crit">
+                <div class="stat-val">2</div>
+                <div class="stat-lbl">Critical Risk</div>
+            </div>
+            <div class="stat-card high">
+                <div class="stat-val">1</div>
+                <div class="stat-lbl">High Risk</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-val">6</div>
+                <div class="stat-lbl">Actionable Mitigations</div>
+            </div>
+        </div>
+
+        <h2>Structured Threat Register</h2>
+        
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Layer 1: Model & Foundation LLM</span>
+                        <h3 style="margin: 4px 0;">Adversarial Jailbreak & System Prompt Extraction on Telematics Unit</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">APPROVED</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #dc2626;">
+                        Critical (20/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Adversarial formatting (base64 obfuscation, multi-turn roleplay, or token manipulation) bypasses system guardrails to extract underlying system instructions and confidential proprietary rules.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Direct prompt injection & token smuggling</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Dual-LLM Guardrail Verification & Prompt Hardening</strong> (Effort: Medium, Status: proposed)<br><small>Deploy a dedicated, isolated guardrail classifier to inspect input/output tokens before passing to the execution LLM. Never embed secrets in system prompts.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Layer 2: Autonomous Agents</span>
+                        <h3 style="margin: 4px 0;">Goal Drift & Runaway Action Loop Hijacking in Telematics Unit</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #d97706;">
+                        Medium (12/25)
+                    </div>
+                </div>
+                <p class="threat-desc">An attacker introduces conflicting sub-goals in an incoming task description, causing the autonomous agent to loop infinitely or prioritize attacker-supplied instructions over legitimate system constraints.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Goal hijacking & autonomous loop subversion</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Deterministic Step Counter & Goal Invariant Enforcement</strong> (Effort: Low, Status: proposed)<br><small>Implement hard recursion limits (max 10 iterations) and enforce immutable core policy checks before each autonomous action step.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Layer 3: Environment & Tool Integrations</span>
+                        <h3 style="margin: 4px 0;">Arbitrary Command & SSRF Execution via Agent Tool Invocation</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #dc2626;">
+                        Critical (20/25)
+                    </div>
+                </div>
+                <p class="threat-desc">The agent possesses tools with high privilege (HTTP fetch, SQL query, or CLI execution). Indirect prompt injection causes the agent to invoke tools with attacker-controlled arguments.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Tool privilege abuse & SSRF via tool parameters</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Tool Argument Schema Validation & Sandboxed Execution</strong> (Effort: High, Status: proposed)<br><small>Enforce strict Pydantic argument validation, block internal IP ranges (127.0.0.1, 169.254.0.0/16) in tool handlers, and execute tools in ephemeral gVisor/WASM sandboxes.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Layer 4: Storage, Context & Memory</span>
+                        <h3 style="margin: 4px 0;">Vector Store Poisoning & RAG Knowledge Corruption in Braking Signal</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #d97706;">
+                        Medium (12/25)
+                    </div>
+                </div>
+                <p class="threat-desc">Attacker uploads a poisoned document into the RAG ingestion pipeline containing high-similarity adversarial text designed to dominate search results and inject malicious instructions into downstream prompts.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> RAG vector database poisoning & semantic hijacking</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Ingestion Sanitization & Tenant-Isolated Vector Namespaces</strong> (Effort: Medium, Status: proposed)<br><small>Sanitize and strip hidden text/metadata before chunking. Isolate vector indexes per tenant with strict cryptographic access control.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Layer 6: Orchestration & Multi-Agent Swarms</span>
+                        <h3 style="margin: 4px 0;">Subversion of Multi-Agent Consensus & Rogue Worker Impersonation</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #d97706;">
+                        Medium (10/25)
+                    </div>
+                </div>
+                <p class="threat-desc">In a multi-agent swarm architecture, lack of mutual cryptographic verification allows a compromised worker agent to forge consensus votes or spoof messages from the coordinator agent.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Inter-agent message forgery & consensus manipulation</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Cryptographically Signed Agent Messages & Quorum Verification</strong> (Effort: High, Status: proposed)<br><small>Require each agent to sign messages with a dedicated key pair and enforce m-of-n quorum rules for high-consequence swarm actions.</small></li></ul>
+                </div>
+            </div>
+            
+            <div class="threat-card">
+                <div class="threat-header">
+                    <div>
+                        <span class="category-pill">Layer 7: User Interface & Human-in-the-Loop</span>
+                        <h3 style="margin: 4px 0;">Confirmation Fatigue & Clickjacking on High-Risk Action Approvals</h3>
+                        <div class="meta-line">Target: <strong>Telematics Unit</strong> &bull; Asset: <strong>Braking Signal</strong> &bull; Status: <span class="status-badge">DRAFT</span></div>
+                    </div>
+                    <div class="severity-badge" style="background-color: #ea580c;">
+                        High (16/25)
+                    </div>
+                </div>
+                <p class="threat-desc">The agent bombards the human supervisor with routine approval requests, inducing confirmation fatigue, and subtly changes parameters on a high-risk operation to secure unintended human approval.</p>
+                <div class="threat-vector"><strong>Attack Vector:</strong> Approval coercion & human-in-the-loop bypass</div>
+                
+                <div class="mitigation-section">
+                    <strong>Mitigations & Countermeasures:</strong>
+                    <ul><li><strong>[Preventive] Tiered Action Friction & Re-Authentication for Critical Tasks</strong> (Effort: Low, Status: proposed)<br><small>Require explicit confirmation with re-authentication (passkey/password) and clear differential visual styling for high-risk destructive actions.</small></li></ul>
+                </div>
+            </div>
+            
+    </div>
+</body>
+</html>

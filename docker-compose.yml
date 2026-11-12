@@ -1,0 +1,136 @@
+version: '3.8'
+
+services:
+  # Reverse Proxy & SSL Gateway
+  nginx:
+    image: nginx:alpine
+    container_name: threatmodel_nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - threatmodel_net
+
+  # React Frontend Container
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    container_name: threatmodel_frontend
+    restart: unless-stopped
+    networks:
+      - threatmodel_net
+
+  # FastAPI Backend Service
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: threatmodel_backend
+    restart: unless-stopped
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql://threatuser:threatpassword@database:5432/threatdb
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=threat-model-studio-super-secret-key-change-in-production-2026
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - OLLAMA_MODEL=${OLLAMA_MODEL:-llama3.1}
+      - UPLOAD_DIR=/app/uploads
+      - REPORTS_DIR=/app/reports
+    volumes:
+      - uploads_data:/app/uploads
+      - reports_data:/app/reports
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - threatmodel_net
+
+  # Celery Background Worker
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: threatmodel_worker
+    restart: unless-stopped
+    command: python -m app.services.llm_service
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=postgresql://threatuser:threatpassword@database:5432/threatdb
+      - REDIS_URL=redis://redis:6379/0
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - OLLAMA_BASE_URL=http://ollama:11434
+    volumes:
+      - uploads_data:/app/uploads
+      - reports_data:/app/reports
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - threatmodel_net
+
+  # PostgreSQL 16 Database
+  database:
+    image: postgres:16-alpine
+    container_name: threatmodel_db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=threatuser
+      - POSTGRES_PASSWORD=threatpassword
+      - POSTGRES_DB=threatdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U threatuser -d threatdb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - threatmodel_net
+
+  # Redis Message Broker & Cache
+  redis:
+    image: redis:7-alpine
+    container_name: threatmodel_redis
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - threatmodel_net
+
+  # Optional Local LLM Container (Run with: docker compose --profile local-ai up)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: threatmodel_ollama
+    restart: unless-stopped
+    profiles:
+      - local-ai
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - threatmodel_net
+
+volumes:
+  postgres_data:
+  uploads_data:
+  reports_data:
+  ollama_data:
+
+networks:
+  threatmodel_net:
+    driver: bridge
