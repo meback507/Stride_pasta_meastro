@@ -24,6 +24,9 @@
 - **Deterministic Risk Engine**:
   - $L \times I$ inherent risk scoring (1–25) and residual risk calculation.
   - Automotive TARA Feasibility vs. SFOP Impact matrix mapping to Cybersecurity Risk Values (1–5).
+- **Code Snippet Threat Modeling Window**:
+  - Paste raw source code (Python, JS/TS, Go, C/C++, Java, Rust, Solidity) directly into an interactive editor.
+  - Automatically identifies code-level threats, attack vectors, affected line numbers, and secure code remediation diffs across STRIDE, PASTA, MAESTRO, or TARA without needing a full project setup.
 - **Interactive Threat Register & Review Workflow**:
   - Filter by category, severity, status, or component.
   - Human review gates: Approve, Reject, Edit, Assign Owners, and Add Custom Countermeasures.

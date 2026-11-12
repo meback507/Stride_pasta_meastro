@@ -6,7 +6,10 @@ from app.models.project import Project, Component, Asset, Document
 from app.models.methodology import Methodology, Assessment
 from app.models.threat import Threat, AttackScenario, RiskAssessment, Mitigation, SecurityRequirement
 from app.models.audit import LLMRun
-from app.schemas.methodology import AssessmentCreate, AssessmentResponse, AIAnalysisRequest, AIAnalysisResponse
+from app.schemas.methodology import (
+    AssessmentCreate, AssessmentResponse, AIAnalysisRequest, AIAnalysisResponse,
+    CodeSnippetAnalysisRequest, CodeSnippetAnalysisResponse
+)
 from app.methodologies.factory import MethodologyFactory
 from app.services.llm_service import LLMService
 
@@ -212,5 +215,159 @@ async def run_ai_analysis(
         "summary": assessment.summary,
         "provider_used": ai_result["provider_used"],
         "model_used": ai_result["model_used"]
+    }
+
+
+@router.post("/analyze-code-snippet", response_model=CodeSnippetAnalysisResponse)
+async def analyze_code_snippet(req: CodeSnippetAnalysisRequest, db: Session = Depends(get_db)):
+    """
+    Performs threat modeling directly on a pasted source code snippet.
+    """
+    # 1. Resolve or create project
+    if req.project_id:
+        project = db.query(Project).filter(Project.id == req.project_id).first()
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+    else:
+        project = db.query(Project).filter(Project.name == "Code Snippet Threat Models").first()
+        if not project:
+            project = Project(
+                name="Code Snippet Threat Models",
+                business_domain="Source Code Review",
+                technical_scope="Static analysis and code-level threat assessments on pasted source code snippets.",
+                status="active"
+            )
+            db.add(project)
+            db.flush()
+
+    # 2. Methodology
+    meth_code = req.methodology_code.upper()
+    methodology = db.query(Methodology).filter(Methodology.code == meth_code).first()
+    if not methodology:
+        methodology = db.query(Methodology).filter(Methodology.code == "STRIDE").first()
+
+    engine = MethodologyFactory.get_engine(meth_code)
+
+    # 3. Create Component for snippet
+    comp_name = req.snippet_title or "Pasted Code Snippet"
+    comp = Component(
+        project_id=project.id,
+        name=comp_name,
+        type=f"Code Module ({req.language})",
+        trust_zone="Application Layer",
+        description=f"Source snippet ({req.language})"
+    )
+    db.add(comp)
+    db.flush()
+
+    # 4. Create Assessment
+    assessment = Assessment(
+        project_id=project.id,
+        methodology_id=methodology.id,
+        name=f"Code Threat Model: {comp_name}",
+        version="v1.0",
+        status="in_review",
+        summary=f"Code-level threat model on {comp_name} ({req.language}) using {engine.name}."
+    )
+    db.add(assessment)
+    db.flush()
+
+    # 5. Run Code Threat Analysis
+    ai_result = await LLMService.generate_code_threats(
+        engine=engine,
+        code_snippet=req.code,
+        language=req.language or "auto",
+        snippet_title=comp_name,
+        provider=req.provider,
+        model_name=req.model_name,
+        custom_instructions=req.custom_instructions
+    )
+
+    # 6. Save LLM Run metadata
+    llm_run = LLMRun(
+        assessment_id=assessment.id,
+        provider=ai_result["provider_used"],
+        model_name=ai_result["model_used"],
+        latency_ms=ai_result["execution_time_ms"],
+        prompt_tokens=ai_result["prompt_tokens"],
+        completion_tokens=ai_result["completion_tokens"],
+        status=ai_result["status"],
+        error_message=ai_result.get("error_message")
+    )
+    db.add(llm_run)
+
+    # 7. Persist threats
+    persisted_threats = []
+    for raw_t in ai_result["threats"]:
+        threat = Threat(
+            assessment_id=assessment.id,
+            component_id=comp.id,
+            threat_category=raw_t.get("threat_category", "Code Flaw"),
+            title=raw_t.get("title", "Untitled Code Threat"),
+            description=raw_t.get("description", ""),
+            attack_vector=raw_t.get("attack_vector"),
+            source_reference=raw_t.get("source_reference", "Code Snippet"),
+            is_ai_generated=True,
+            review_status="draft"
+        )
+        db.add(threat)
+        db.flush()
+
+        scen = raw_t.get("attack_scenario")
+        if scen and isinstance(scen, dict):
+            db.add(AttackScenario(
+                threat_id=threat.id,
+                step_order=1,
+                description=scen.get("description", ""),
+                pre_conditions=scen.get("pre_conditions"),
+                post_conditions=scen.get("post_conditions")
+            ))
+
+        ra = raw_t.get("risk_assessment", {})
+        db.add(RiskAssessment(
+            threat_id=threat.id,
+            likelihood=ra.get("likelihood", 3),
+            impact=ra.get("impact", 4),
+            inherent_risk=ra.get("inherent_risk", 12),
+            residual_risk=ra.get("residual_risk", 6),
+            severity=ra.get("severity", "Medium"),
+            risk_treatment=ra.get("risk_treatment", "mitigate")
+        ))
+
+        for m in raw_t.get("mitigations", []):
+            db.add(Mitigation(
+                threat_id=threat.id,
+                title=m.get("title", "Code Remediation"),
+                description=m.get("description", ""),
+                mitigation_type=m.get("mitigation_type", "Preventive"),
+                implementation_effort=m.get("effort", "Low"),
+                status="proposed"
+            ))
+
+        sec_req = raw_t.get("security_requirement")
+        if sec_req:
+            db.add(SecurityRequirement(
+                threat_id=threat.id,
+                requirement_text=sec_req,
+                standard_ref="CWE / Secure Coding Guidelines"
+            ))
+
+        persisted_threats.append(threat)
+
+    db.commit()
+
+    return {
+        "assessment_id": assessment.id,
+        "project_id": project.id,
+        "snippet_title": comp_name,
+        "language": req.language or "auto",
+        "methodology": engine.name,
+        "status": "completed",
+        "threats_generated": len(persisted_threats),
+        "execution_time_ms": ai_result["execution_time_ms"],
+        "summary": assessment.summary,
+        "provider_used": ai_result["provider_used"],
+        "model_used": ai_result["model_used"],
+        "threats": persisted_threats
     }
 

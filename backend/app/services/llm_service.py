@@ -94,6 +94,79 @@ class LLMService:
         }
 
     @staticmethod
+    async def generate_code_threats(
+        engine: BaseMethodologyEngine,
+        code_snippet: str,
+        language: str = "auto",
+        snippet_title: str = "Code Snippet",
+        provider: Optional[str] = None,
+        model_name: Optional[str] = None,
+        custom_instructions: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Orchestrates code-level threat modeling on pasted code snippets.
+        """
+        start_time = time.time()
+        active_provider = (provider or settings.DEFAULT_LLM_PROVIDER).lower()
+        active_model = model_name or (settings.OPENAI_MODEL if active_provider == "openai" else settings.OLLAMA_MODEL)
+
+        safe_code = DocumentService.sanitize_untrusted_context(code_snippet, max_chars=30000)
+        system_prompt = f"""You are a Principal Application Security Engineer and Secure Code Reviewer.
+Perform a strict code-level threat model using the {engine.name} ({engine.code}) methodology.
+Analyze input validation, memory safety, authentication, authorization, cryptography, and business logic flaws.
+Adhere strictly to the {engine.code} categorization: {", ".join(engine.get_categories())}."""
+
+        user_prompt = engine.build_code_snippet_prompt(
+            code_snippet=safe_code,
+            language=language,
+            snippet_title=snippet_title,
+            custom_instructions=custom_instructions
+        )
+
+        threats = []
+        tokens_used = {"prompt_tokens": 0, "completion_tokens": 0}
+        error_msg = None
+        status = "success"
+
+        try:
+            if active_provider == "openai" and settings.OPENAI_API_KEY:
+                threats, tokens_used = await LLMService._call_openai(system_prompt, user_prompt, active_model)
+            elif active_provider == "ollama":
+                threats, tokens_used = await LLMService._call_ollama(system_prompt, user_prompt, active_model)
+            else:
+                threats = engine.generate_simulated_code_threats(code_snippet, language, snippet_title)
+                active_provider = "simulation"
+                active_model = f"deterministic-code-analyzer-v1.0 ({engine.code})"
+                tokens_used = {"prompt_tokens": len(user_prompt) // 4, "completion_tokens": 750}
+        except Exception as e:
+            error_msg = f"Provider {active_provider} error: {str(e)}. Falling back to deterministic code threat model."
+            threats = engine.generate_simulated_code_threats(code_snippet, language, snippet_title)
+            active_provider = "simulation (fallback)"
+            active_model = f"deterministic-code-analyzer-v1.0 ({engine.code})"
+            status = "fallback_success"
+
+        execution_time_ms = int((time.time() - start_time) * 1000)
+
+        processed_threats = []
+        for t in threats:
+            risk_calc = engine.calculate_risk(t)
+            t["risk_assessment"] = risk_calc
+            t["likelihood"] = risk_calc["likelihood"]
+            t["impact"] = risk_calc["impact"]
+            processed_threats.append(t)
+
+        return {
+            "threats": processed_threats,
+            "provider_used": active_provider,
+            "model_used": active_model,
+            "execution_time_ms": execution_time_ms,
+            "prompt_tokens": tokens_used.get("prompt_tokens", 0),
+            "completion_tokens": tokens_used.get("completion_tokens", 0),
+            "status": status,
+            "error_message": error_msg
+        }
+
+    @staticmethod
     async def _call_openai(system_prompt: str, user_prompt: str, model: str):
         from openai import AsyncOpenAI
         client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY, base_url=settings.OPENAI_BASE_URL)

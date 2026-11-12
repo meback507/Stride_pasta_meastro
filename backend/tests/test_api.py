@@ -138,3 +138,59 @@ def test_dashboard_metrics():
     assert "severity_breakdown" in metrics
     assert "risk_heatmap" in metrics
 
+
+def test_code_snippet_threat_modeling():
+    # Sample vulnerable python snippet with SQL injection and shell execution
+    sample_code = """
+import os
+import sqlite3
+
+def handle_user_command(user_id, raw_cmd):
+    # Unsanitized query
+    conn = sqlite3.connect("app.db")
+    cursor = conn.cursor()
+    cursor.execute(f"SELECT * FROM users WHERE id = '{user_id}'")
+    
+    # Dangerous shell execution
+    os.system(f"echo Log: {raw_cmd} >> audit.log")
+    return cursor.fetchall()
+"""
+    # 1. Test Code Snippet analysis with STRIDE
+    res_stride = client.post("/api/assessments/analyze-code-snippet", json={
+        "code": sample_code,
+        "language": "python",
+        "snippet_title": "User Command Handler",
+        "methodology_code": "STRIDE",
+        "provider": "simulation"
+    })
+    assert res_stride.status_code == 200
+    data_stride = res_stride.json()
+    assert data_stride["status"] == "completed"
+    assert data_stride["threats_generated"] > 0
+    assert len(data_stride["threats"]) > 0
+
+    categories = [t["threat_category"] for t in data_stride["threats"]]
+    assert any(c in ["Tampering", "Elevation of Privilege", "Spoofing", "Information Disclosure"] for c in categories)
+
+    # 2. Test Code Snippet analysis with MAESTRO (Agentic AI)
+    agent_code = """
+from langchain.agents import AgentExecutor
+import requests
+
+def agent_worker_tool(query):
+    # SSRF & prompt injection vulnerable tool call
+    res = requests.get(f"http://internal-api/{query}")
+    return res.text
+"""
+    res_maestro = client.post("/api/assessments/analyze-code-snippet", json={
+        "code": agent_code,
+        "language": "python",
+        "snippet_title": "Agentic AI Tool Worker",
+        "methodology_code": "MAESTRO",
+        "provider": "simulation"
+    })
+    assert res_maestro.status_code == 200
+    data_maestro = res_maestro.json()
+    assert data_maestro["threats_generated"] > 0
+
+

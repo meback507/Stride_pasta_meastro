@@ -304,3 +304,117 @@ Generate structured threats in valid JSON matching this schema:
             }
         ]
 
+    def generate_simulated_code_threats(
+        self,
+        code_snippet: str,
+        language: str = "auto",
+        snippet_title: str = "Code Snippet"
+    ) -> List[Dict[str, Any]]:
+        # Scan for common patterns in snippet to make simulation dynamic
+        has_sql = "select " in code_snippet.lower() or "where " in code_snippet.lower() or "exec" in code_snippet.lower()
+        has_auth = "auth" in code_snippet.lower() or "token" in code_snippet.lower() or "jwt" in code_snippet.lower()
+        has_exec = "system" in code_snippet.lower() or "popen" in code_snippet.lower() or "eval" in code_snippet.lower()
+
+        return [
+            {
+                "threat_category": "Tampering",
+                "title": f"Input Sanitization & Injection Flaw in {snippet_title}",
+                "description": f"The code snippet accepts unvalidated external input into critical execution paths ({'SQL/Database query construction' if has_sql else 'parameter binding'}), allowing adversaries to manipulate data integrity.",
+                "attack_vector": "CWE-89 SQL Injection / CWE-20 Improper Input Validation",
+                "component_name": snippet_title,
+                "asset_name": "Database & Internal State",
+                "source_reference": "Code Snippet: Input handling lines",
+                "likelihood": 4,
+                "impact": 5,
+                "attack_scenario": {
+                    "description": "1. Attacker passes malicious payload containing quote delimiters. 2. Code interpolates string directly without parameterized queries. 3. Unauthorized data is modified or deleted.",
+                    "pre_conditions": "Attacker supplies input to target code function",
+                    "post_conditions": "Database tampering, data loss, or unauthorized record alteration"
+                },
+                "mitigations": [
+                    {
+                        "title": "Use Parameterized Queries / ORM Prepared Statements",
+                        "description": "Refactor raw string concatenation to parameterized queries (e.g. SQLAlchemy bind parameters, PreparedStatement).",
+                        "mitigation_type": "Preventive",
+                        "effort": "Low"
+                    }
+                ],
+                "security_requirement": "All dynamic inputs into data queries must use parameterized bindings."
+            },
+            {
+                "threat_category": "Spoofing",
+                "title": f"Missing Authentication Decorator & Identity Verification in {snippet_title}",
+                "description": f"Function handles sensitive operations without explicitly enforcing session token verification or caller identity checks.",
+                "attack_vector": "CWE-306 Missing Authentication for Critical Function",
+                "component_name": snippet_title,
+                "asset_name": "API Service Endpoint",
+                "source_reference": "Code Snippet: Function entrypoint",
+                "likelihood": 4,
+                "impact": 4,
+                "attack_scenario": {
+                    "description": "1. Unauthenticated client sends HTTP request directly to endpoint. 2. Function executes without validating Authorization header. 3. Privileged action completes.",
+                    "pre_conditions": "Network access to function",
+                    "post_conditions": "Unauthorized caller executes privileged business logic"
+                },
+                "mitigations": [
+                    {
+                        "title": "Enforce Authentication Middleware / Guard Decorators",
+                        "description": "Add `@require_auth` or dependency injection security checks (e.g., `Depends(get_current_user)`) at the function definition.",
+                        "mitigation_type": "Preventive",
+                        "effort": "Low"
+                    }
+                ],
+                "security_requirement": "All endpoints executing sensitive operations shall enforce caller authentication."
+            },
+            {
+                "threat_category": "Elevation of Privilege",
+                "title": f"Unsanitized Command Execution & Privilege Escalation in {snippet_title}",
+                "description": f"Code contains dangerous invocation patterns ({'shell command / eval' if has_exec else 'dynamic dispatch'}) that can be leveraged for arbitrary execution.",
+                "attack_vector": "CWE-78 OS Command Injection / CWE-94 Code Injection",
+                "component_name": snippet_title,
+                "asset_name": "Host Operating System",
+                "source_reference": "Code Snippet: System execution calls",
+                "likelihood": 3,
+                "impact": 5,
+                "attack_scenario": {
+                    "description": "1. Attacker crafts input with command separators (`;`, `&&`, `|`). 2. Code passes input to system shell. 3. Reverse shell spawned with application service privileges.",
+                    "pre_conditions": "Attacker control over argument passed to system calls",
+                    "post_conditions": "Host OS compromise and remote code execution"
+                },
+                "mitigations": [
+                    {
+                        "title": "Eliminate Shell Invocations & Sanitize Arguments",
+                        "description": "Use dedicated native API libraries instead of invoking shell commands. If subprocess is necessary, pass arguments as an array with `shell=False`.",
+                        "mitigation_type": "Preventive",
+                        "effort": "Medium"
+                    }
+                ],
+                "security_requirement": "Applications shall never invoke shell interpreters with user-controlled input strings."
+            },
+            {
+                "threat_category": "Information Disclosure",
+                "title": f"Hardcoded Secrets & Unmasked Sensitive Variable Leakage in {snippet_title}",
+                "description": "Code includes potential credentials, API tokens, or logs sensitive variables without masking.",
+                "attack_vector": "CWE-798 Use of Hard-coded Credentials / CWE-532 Insertion of Sensitive Information into Log File",
+                "component_name": snippet_title,
+                "asset_name": "Application Secrets & Tokens",
+                "source_reference": "Code Snippet: Variable declarations",
+                "likelihood": 3,
+                "impact": 4,
+                "attack_scenario": {
+                    "description": "1. Code is committed to version control. 2. Attacker inspects repository history or logs. 3. Attacker uses extracted credential to access backend services directly.",
+                    "pre_conditions": "Access to source repository or runtime log stream",
+                    "post_conditions": "Credential theft leading to unauthorized service access"
+                },
+                "mitigations": [
+                    {
+                        "title": "Migrate Secrets to Environment Variables / Secrets Manager",
+                        "description": "Use Vault, AWS Secrets Manager, or `os.environ` to load secrets at runtime. Implement automated secret scanning (e.g. TruffleHog, GitGuardian).",
+                        "mitigation_type": "Preventive",
+                        "effort": "Low"
+                    }
+                ],
+                "security_requirement": "Source code shall contain zero plaintext API keys, passwords, or cryptographic secrets."
+            }
+        ]
+
