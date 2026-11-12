@@ -134,3 +134,4 @@ volumes:
 networks:
   threatmodel_net:
     driver: bridge
+

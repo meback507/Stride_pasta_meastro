@@ -201,3 +201,4 @@ Stride_pasta_meastro/
 2. **Deterministic Risk Calculation**: AI models generate threat hypotheses, but likelihood, impact, inherent risk, and TARA feasibility values are verified by deterministic code.
 3. **Human-in-the-Loop (HITL)**: All AI-generated threats are flagged as `draft` and require explicit human security engineer review and approval.
 4. **Auditability**: Every AI run records its provider, model name, prompt tokens, completion tokens, execution latency, and prompt template version.
+

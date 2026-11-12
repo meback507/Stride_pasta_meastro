@@ -161,3 +161,4 @@ def delete_threat(threat_id: int, db: Session = Depends(get_db)):
     db.delete(threat)
     db.commit()
     return None
+

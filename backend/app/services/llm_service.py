@@ -143,3 +143,4 @@ class LLMService:
                 "completion_tokens": data.get("eval_count", 0)
             }
             return threats, tokens
+

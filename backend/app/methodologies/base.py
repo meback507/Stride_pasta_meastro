@@ -57,3 +57,4 @@ class BaseMethodologyEngine(ABC):
         Used when running in offline simulation mode or as fallback.
         """
         pass
+

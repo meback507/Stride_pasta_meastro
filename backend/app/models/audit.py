@@ -33,3 +33,4 @@ class AuditLog(Base):
     entity_id = Column(Integer, nullable=False)
     change_diff = Column(JSON, nullable=True)
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)
+

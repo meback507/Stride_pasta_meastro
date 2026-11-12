@@ -135,3 +135,4 @@ class ThreatResponse(ThreatBase):
 
     class Config:
         from_attributes = True
+

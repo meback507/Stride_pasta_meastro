@@ -73,3 +73,4 @@ def delete_document(document_id: int, db: Session = Depends(get_db)):
     db.delete(doc)
     db.commit()
     return None
+

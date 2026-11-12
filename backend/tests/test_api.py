@@ -137,3 +137,4 @@ def test_dashboard_metrics():
     assert "total_projects" in metrics
     assert "severity_breakdown" in metrics
     assert "risk_heatmap" in metrics
+

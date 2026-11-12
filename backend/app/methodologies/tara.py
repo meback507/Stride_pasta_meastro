@@ -273,3 +273,4 @@ Generate structured TARA findings strictly in valid JSON adhering to:
                 "security_requirement": "[CG-ACCESS-04] The keyless entry and start system shall enforce cryptographic distance bounding resistant to RF relay amplification."
             }
         ]
+

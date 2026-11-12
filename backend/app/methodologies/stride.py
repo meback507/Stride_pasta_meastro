@@ -303,3 +303,4 @@ Generate structured threats in valid JSON matching this schema:
                 "security_requirement": "Every API request accessing specific resources shall cryptographically verify tenant ownership before executing queries."
             }
         ]
+

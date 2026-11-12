@@ -51,3 +51,4 @@ def get_dashboard_metrics(db: Session = Depends(get_db)):
         "methodology_distribution": methodology_counts,
         "risk_heatmap": heatmap
     }
+

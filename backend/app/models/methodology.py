@@ -36,3 +36,4 @@ class Assessment(Base):
     methodology = relationship("Methodology", back_populates="assessments")
     threats = relationship("Threat", back_populates="assessment", cascade="all, delete-orphan")
     llm_runs = relationship("LLMRun", back_populates="assessment", cascade="all, delete-orphan")
+

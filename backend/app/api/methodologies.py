@@ -52,3 +52,4 @@ def get_methodology(code: str, db: Session = Depends(get_db)):
             "category_type": engine.category_type
         }
     }
+

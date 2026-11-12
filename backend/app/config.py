@@ -54,3 +54,4 @@ settings = Settings()
 # Ensure directories exist
 os.makedirs(settings.UPLOAD_DIR, exist_ok=True)
 os.makedirs(settings.REPORTS_DIR, exist_ok=True)
+

@@ -61,3 +61,4 @@ class AIAnalysisResponse(BaseModel):
     summary: str
     provider_used: str
     model_used: str
+

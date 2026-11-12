@@ -103,3 +103,4 @@ class Review(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     threat = relationship("Threat", back_populates="reviews")
+

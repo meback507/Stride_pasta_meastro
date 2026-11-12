@@ -71,3 +71,4 @@ class RiskService:
             "tara_risk_value": risk_val,
             "severity": severity_map.get(risk_val, "Medium")
         }
+

@@ -122,3 +122,4 @@ class DocumentService:
             sanitized = sanitized[:max_chars] + f"\n... [Context truncated at {max_chars} characters for token safety] ..."
             
         return sanitized
+
