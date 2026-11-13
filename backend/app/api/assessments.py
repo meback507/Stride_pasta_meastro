@@ -240,8 +240,22 @@ async def analyze_code_snippet(req: CodeSnippetAnalysisRequest, db: Session = De
             db.add(project)
             db.flush()
 
-    # 2. Methodology
-    meth_code = req.methodology_code.upper()
+    # 2. Intelligent Code Understanding & Methodology Selection
+    classification = await LLMService.classify_code_and_methodology(
+        code_snippet=req.code,
+        language=req.language or "auto",
+        provider=req.provider,
+        model_name=req.model_name
+    )
+
+    req_meth = (req.methodology_code or "AUTO").strip().upper()
+    if req_meth in ["AUTO", "AUTO-DETECT", "AUTO_DETECT", "DEFAULT", ""]:
+        meth_code = classification["selected_methodology"]
+        rationale = classification["rationale"]
+    else:
+        meth_code = req_meth
+        rationale = f"User specified {req_meth}. AI detected domain: {classification['detected_domain']} ({classification['code_purpose_summary']})."
+
     methodology = db.query(Methodology).filter(Methodology.code == meth_code).first()
     if not methodology:
         methodology = db.query(Methodology).filter(Methodology.code == "STRIDE").first()
@@ -264,7 +278,7 @@ async def analyze_code_snippet(req: CodeSnippetAnalysisRequest, db: Session = De
     assessment = Assessment(
         project_id=project.id,
         methodology_id=methodology.id,
-        name=f"Code Threat Model: {comp_name}",
+        name=f"Code Threat Model ({engine.code}): {comp_name}",
         version="v1.0",
         status="in_review",
         summary=f"Code-level threat model on {comp_name} ({req.language}) using {engine.name}."
@@ -366,6 +380,9 @@ async def analyze_code_snippet(req: CodeSnippetAnalysisRequest, db: Session = De
         "threats_generated": len(persisted_threats),
         "execution_time_ms": ai_result["execution_time_ms"],
         "summary": assessment.summary,
+        "code_purpose_summary": classification.get("code_purpose_summary"),
+        "selected_methodology_rationale": rationale,
+        "detected_domain": classification.get("detected_domain"),
         "provider_used": ai_result["provider_used"],
         "model_used": ai_result["model_used"],
         "threats": persisted_threats

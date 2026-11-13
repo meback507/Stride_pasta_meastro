@@ -669,9 +669,13 @@
 
             <!-- Methodology Selector for Code -->
             <div style="margin-bottom: 1rem;">
-              <label class="form-label">Threat Methodology</label>
-              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-                <button type="button" class="btn btn-secondary active-code-meth" id="btn-code-meth-STRIDE" onclick="setCodeMethodology('STRIDE')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center; background: var(--primary); color: #fff;">STRIDE</button>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px;">
+                <label class="form-label" style="margin-bottom: 0;">Threat Methodology</label>
+                <span style="font-size: 0.72rem; color: var(--text-muted);">LLM auto-detects domain or select manually</span>
+              </div>
+              <div style="display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr 1fr; gap: 8px;">
+                <button type="button" class="btn btn-secondary active-code-meth" id="btn-code-meth-AUTO" onclick="setCodeMethodology('AUTO')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center; background: linear-gradient(135deg, #0284c7 0%, #6366f1 100%); color: #fff; font-weight: 600;">✨ Auto-Detect</button>
+                <button type="button" class="btn btn-secondary" id="btn-code-meth-STRIDE" onclick="setCodeMethodology('STRIDE')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">STRIDE</button>
                 <button type="button" class="btn btn-secondary" id="btn-code-meth-PASTA" onclick="setCodeMethodology('PASTA')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">PASTA</button>
                 <button type="button" class="btn btn-secondary" id="btn-code-meth-MAESTRO" onclick="setCodeMethodology('MAESTRO')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">MAESTRO</button>
                 <button type="button" class="btn btn-secondary" id="btn-code-meth-TARA" onclick="setCodeMethodology('TARA')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">TARA</button>
@@ -680,10 +684,11 @@
 
             <!-- Quick Template Presets -->
             <div style="margin-bottom: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Presets:</span>
-              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('python_sqli')">Python Auth/SQL Injection</button>
-              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('agent_tool')">Agentic AI Tool Execution</button>
-              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('can_handler')">Automotive CAN Handler</button>
+              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Try Presets:</span>
+              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('python_sqli')">SQL & Shell Injection (STRIDE)</button>
+              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('pasta_ledger')">Payment Ledger (PASTA)</button>
+              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('agent_tool')">Agentic AI Tool (MAESTRO)</button>
+              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('can_handler')">Vehicle CAN Bus (TARA)</button>
             </div>
 
             <!-- Code Editor Window -->
@@ -1106,127 +1111,6 @@ def handle_user_command(user_id, raw_cmd):
       </div>
     </section>
 
-    <!-- TAB: CODE SNIPPET THREAT MODELING -->
-    <section id="tab-code-threat" class="tab-content">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>💻</span> Code Snippet Threat Modeling
-          </div>
-          <span class="badge-pill">Static Analysis & Threat Modeling</span>
-        </div>
-        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-          Paste source code into the editor below to automatically extract threat surfaces, simulate attack scenarios, and generate secure code remediations using <strong>STRIDE</strong>, <strong>PASTA</strong>, <strong>MAESTRO</strong>, or <strong>ISO/SAE 21434 TARA</strong>.
-        </p>
-
-        <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 1.5rem;">
-          <!-- Left: Code Input & Config -->
-          <div>
-            <div style="display: grid; grid-template-columns: 1fr 140px; gap: 10px; margin-bottom: 1rem;">
-              <div>
-                <label class="form-label">Snippet Title / Module</label>
-                <input type="text" id="code-snippet-title" class="form-input" value="User Authentication & Query Handler" placeholder="e.g. Auth Gateway Endpoint">
-              </div>
-              <div>
-                <label class="form-label">Language</label>
-                <select id="code-snippet-lang" class="form-select">
-                  <option value="python" selected>Python</option>
-                  <option value="javascript">JavaScript / Node</option>
-                  <option value="typescript">TypeScript</option>
-                  <option value="c">C / C++ (Embedded)</option>
-                  <option value="go">Go</option>
-                  <option value="java">Java</option>
-                  <option value="rust">Rust</option>
-                  <option value="solidity">Solidity</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Methodology Selector for Code -->
-            <div style="margin-bottom: 1rem;">
-              <label class="form-label">Threat Methodology</label>
-              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-                <button type="button" class="btn btn-secondary active-code-meth" id="btn-code-meth-STRIDE" onclick="setCodeMethodology('STRIDE')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center; background: var(--primary); color: #fff;">STRIDE</button>
-                <button type="button" class="btn btn-secondary" id="btn-code-meth-PASTA" onclick="setCodeMethodology('PASTA')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">PASTA</button>
-                <button type="button" class="btn btn-secondary" id="btn-code-meth-MAESTRO" onclick="setCodeMethodology('MAESTRO')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">MAESTRO</button>
-                <button type="button" class="btn btn-secondary" id="btn-code-meth-TARA" onclick="setCodeMethodology('TARA')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">TARA</button>
-              </div>
-            </div>
-
-            <!-- Quick Template Presets -->
-            <div style="margin-bottom: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Presets:</span>
-              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('python_sqli')">Python Auth/SQL Injection</button>
-              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('agent_tool')">Agentic AI Tool Execution</button>
-              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('can_handler')">Automotive CAN Handler</button>
-            </div>
-
-            <!-- Code Editor Window -->
-            <div style="position: relative; margin-bottom: 1.25rem;">
-              <div style="background: #020617; border: 1px solid var(--card-border); border-bottom: none; border-radius: 6px 6px 0 0; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-muted);">
-                <span>💻 Source Code Window</span>
-                <span id="code-stats">Line: 1-18 | Char: 432</span>
-              </div>
-              <textarea id="code-snippet-input" class="form-textarea" style="font-family: var(--font-mono); height: 340px; background: #070b12; border: 1px solid var(--card-border); border-radius: 0 0 6px 6px; line-height: 1.5; font-size: 0.85rem; padding: 12px; color: #7dd3fc; white-space: pre;" oninput="updateCodeStats()">import os
-import sqlite3
-
-def handle_user_command(user_id, raw_cmd):
-    # Unsanitized database query construct
-    conn = sqlite3.connect("app.db")
-    cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM users WHERE id = '{user_id}'")
-    user = cursor.fetchone()
-    
-    # Dangerous shell command execution
-    os.system(f"echo User {user_id} executed {raw_cmd} >> audit.log")
-    
-    return user
-</textarea>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem;">
-              <div>
-                <label class="form-label" style="font-size: 0.78rem;">Analysis Provider</label>
-                <select id="code-provider" class="form-select" style="font-size: 0.85rem; padding: 6px 8px;">
-                  <option value="simulation" selected>Deterministic Simulation (Instant Offline)</option>
-                  <option value="openai">OpenAI Cloud API (gpt-4o)</option>
-                  <option value="ollama">Ollama Local Model</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label" style="font-size: 0.78rem;">Custom Guidance (Optional)</label>
-                <input type="text" id="code-custom-instructions" class="form-input" style="font-size: 0.85rem; padding: 6px 8px;" placeholder="e.g. Focus on memory safety & privilege escalation">
-              </div>
-            </div>
-
-            <button type="button" class="btn btn-primary" id="btn-run-code-threat" onclick="executeCodeSnippetAnalysis()" style="width: 100%; justify-content: center; font-size: 0.95rem; padding: 0.75rem;">
-              <span>🚀</span> Analyze Code Snippet for Threats
-            </button>
-          </div>
-
-          <!-- Right: Threat Model Output Window -->
-          <div>
-            <div class="panel-header" style="margin-bottom: 1rem;">
-              <div class="panel-title" style="font-size: 0.95rem;">
-                <span>🛡️</span> Code Threat Findings & Remediation
-              </div>
-              <span id="code-findings-count" class="badge-pill" style="display: none;">0 Threats</span>
-            </div>
-
-            <div id="code-findings-container" style="max-height: 560px; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 12px;">
-              <div style="text-align: center; padding: 4rem 1.5rem; color: var(--text-muted); background: #090e17; border: 1px dashed var(--card-border); border-radius: 8px;">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">🔍</div>
-                <h4 style="color: #cbd5e1; margin-bottom: 6px;">No Code Analysis Run Yet</h4>
-                <p style="font-size: 0.82rem; line-height: 1.5; max-width: 320px; margin: 0 auto;">
-                  Paste your code snippet in the left window and click <strong>"Analyze Code Snippet for Threats"</strong> to identify code vulnerabilities, attack vectors, and secure code patches.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
     <!-- TAB 5: METHODOLOGIES KNOWLEDGE BASE -->
     <section id="tab-methodologies" class="tab-content">
       <div class="panel">
@@ -1312,127 +1196,6 @@ def handle_user_command(user_id, raw_cmd):
               <span class="cat-badge">Feasibility Rating</span>
               <span class="cat-badge">Risk Matrix (1-5)</span>
               <span class="cat-badge">Cybersecurity Goals (CG)</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB: CODE SNIPPET THREAT MODELING -->
-    <section id="tab-code-threat" class="tab-content">
-      <div class="panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>💻</span> Code Snippet Threat Modeling
-          </div>
-          <span class="badge-pill">Static Analysis & Threat Modeling</span>
-        </div>
-        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.5rem;">
-          Paste source code into the editor below to automatically extract threat surfaces, simulate attack scenarios, and generate secure code remediations using <strong>STRIDE</strong>, <strong>PASTA</strong>, <strong>MAESTRO</strong>, or <strong>ISO/SAE 21434 TARA</strong>.
-        </p>
-
-        <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 1.5rem;">
-          <!-- Left: Code Input & Config -->
-          <div>
-            <div style="display: grid; grid-template-columns: 1fr 140px; gap: 10px; margin-bottom: 1rem;">
-              <div>
-                <label class="form-label">Snippet Title / Module</label>
-                <input type="text" id="code-snippet-title" class="form-input" value="User Authentication & Query Handler" placeholder="e.g. Auth Gateway Endpoint">
-              </div>
-              <div>
-                <label class="form-label">Language</label>
-                <select id="code-snippet-lang" class="form-select">
-                  <option value="python" selected>Python</option>
-                  <option value="javascript">JavaScript / Node</option>
-                  <option value="typescript">TypeScript</option>
-                  <option value="c">C / C++ (Embedded)</option>
-                  <option value="go">Go</option>
-                  <option value="java">Java</option>
-                  <option value="rust">Rust</option>
-                  <option value="solidity">Solidity</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Methodology Selector for Code -->
-            <div style="margin-bottom: 1rem;">
-              <label class="form-label">Threat Methodology</label>
-              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
-                <button type="button" class="btn btn-secondary active-code-meth" id="btn-code-meth-STRIDE" onclick="setCodeMethodology('STRIDE')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center; background: var(--primary); color: #fff;">STRIDE</button>
-                <button type="button" class="btn btn-secondary" id="btn-code-meth-PASTA" onclick="setCodeMethodology('PASTA')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">PASTA</button>
-                <button type="button" class="btn btn-secondary" id="btn-code-meth-MAESTRO" onclick="setCodeMethodology('MAESTRO')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">MAESTRO</button>
-                <button type="button" class="btn btn-secondary" id="btn-code-meth-TARA" onclick="setCodeMethodology('TARA')" style="font-size: 0.8rem; padding: 6px 4px; justify-content: center;">TARA</button>
-              </div>
-            </div>
-
-            <!-- Quick Template Presets -->
-            <div style="margin-bottom: 10px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center;">
-              <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 600;">Presets:</span>
-              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('python_sqli')">Python Auth/SQL Injection</button>
-              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('agent_tool')">Agentic AI Tool Execution</button>
-              <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.72rem;" onclick="loadCodePreset('can_handler')">Automotive CAN Handler</button>
-            </div>
-
-            <!-- Code Editor Window -->
-            <div style="position: relative; margin-bottom: 1.25rem;">
-              <div style="background: #020617; border: 1px solid var(--card-border); border-bottom: none; border-radius: 6px 6px 0 0; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text-muted);">
-                <span>💻 Source Code Window</span>
-                <span id="code-stats">Line: 1-18 | Char: 432</span>
-              </div>
-              <textarea id="code-snippet-input" class="form-textarea" style="font-family: var(--font-mono); height: 340px; background: #070b12; border: 1px solid var(--card-border); border-radius: 0 0 6px 6px; line-height: 1.5; font-size: 0.85rem; padding: 12px; color: #7dd3fc; white-space: pre;" oninput="updateCodeStats()">import os
-import sqlite3
-
-def handle_user_command(user_id, raw_cmd):
-    # Unsanitized database query construct
-    conn = sqlite3.connect("app.db")
-    cursor = conn.cursor()
-    cursor.execute(f"SELECT * FROM users WHERE id = '{user_id}'")
-    user = cursor.fetchone()
-    
-    # Dangerous shell command execution
-    os.system(f"echo User {user_id} executed {raw_cmd} >> audit.log")
-    
-    return user
-</textarea>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem;">
-              <div>
-                <label class="form-label" style="font-size: 0.78rem;">Analysis Provider</label>
-                <select id="code-provider" class="form-select" style="font-size: 0.85rem; padding: 6px 8px;">
-                  <option value="simulation" selected>Deterministic Simulation (Instant Offline)</option>
-                  <option value="openai">OpenAI Cloud API (gpt-4o)</option>
-                  <option value="ollama">Ollama Local Model</option>
-                </select>
-              </div>
-              <div>
-                <label class="form-label" style="font-size: 0.78rem;">Custom Guidance (Optional)</label>
-                <input type="text" id="code-custom-instructions" class="form-input" style="font-size: 0.85rem; padding: 6px 8px;" placeholder="e.g. Focus on memory safety & privilege escalation">
-              </div>
-            </div>
-
-            <button type="button" class="btn btn-primary" id="btn-run-code-threat" onclick="executeCodeSnippetAnalysis()" style="width: 100%; justify-content: center; font-size: 0.95rem; padding: 0.75rem;">
-              <span>🚀</span> Analyze Code Snippet for Threats
-            </button>
-          </div>
-
-          <!-- Right: Threat Model Output Window -->
-          <div>
-            <div class="panel-header" style="margin-bottom: 1rem;">
-              <div class="panel-title" style="font-size: 0.95rem;">
-                <span>🛡️</span> Code Threat Findings & Remediation
-              </div>
-              <span id="code-findings-count" class="badge-pill" style="display: none;">0 Threats</span>
-            </div>
-
-            <div id="code-findings-container" style="max-height: 560px; overflow-y: auto; padding-right: 4px; display: flex; flex-direction: column; gap: 12px;">
-              <div style="text-align: center; padding: 4rem 1.5rem; color: var(--text-muted); background: #090e17; border: 1px dashed var(--card-border); border-radius: 8px;">
-                <div style="font-size: 2.5rem; margin-bottom: 10px;">🔍</div>
-                <h4 style="color: #cbd5e1; margin-bottom: 6px;">No Code Analysis Run Yet</h4>
-                <p style="font-size: 0.82rem; line-height: 1.5; max-width: 320px; margin: 0 auto;">
-                  Paste your code snippet in the left window and click <strong>"Analyze Code Snippet for Threats"</strong> to identify code vulnerabilities, attack vectors, and secure code patches.
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -1850,19 +1613,25 @@ def handle_user_command(user_id, raw_cmd):
     }
 
     // Code Threat Model Feature
-    let selectedCodeMethodology = 'STRIDE';
+    let selectedCodeMethodology = 'AUTO';
 
     function setCodeMethodology(code) {
       selectedCodeMethodology = code;
-      ['STRIDE', 'PASTA', 'MAESTRO', 'TARA'].forEach(m => {
+      ['AUTO', 'STRIDE', 'PASTA', 'MAESTRO', 'TARA'].forEach(m => {
         const btn = document.getElementById(`btn-code-meth-${m}`);
         if (btn) {
           if (m === code) {
-            btn.style.background = 'var(--primary)';
+            if (m === 'AUTO') {
+              btn.style.background = 'linear-gradient(135deg, #0284c7 0%, #6366f1 100%)';
+            } else {
+              btn.style.background = 'var(--primary)';
+            }
             btn.style.color = '#fff';
+            btn.classList.add('active-code-meth');
           } else {
             btn.style.background = 'rgba(255, 255, 255, 0.08)';
             btn.style.color = 'var(--text)';
+            btn.classList.remove('active-code-meth');
           }
         }
       });
@@ -1884,7 +1653,7 @@ def handle_user_command(user_id, raw_cmd):
       if (type === 'python_sqli') {
         title.value = "User Authentication & Database Query Handler";
         lang.value = "python";
-        setCodeMethodology('STRIDE');
+        setCodeMethodology('AUTO');
         input.value = `import os
 import sqlite3
 
@@ -1899,10 +1668,29 @@ def handle_user_command(user_id, raw_cmd):
     os.system(f"echo User {user_id} executed {raw_cmd} >> audit.log")
     
     return user`;
+      } else if (type === 'pasta_ledger') {
+        title.value = "E-Commerce Payment & Account Balance Ledger";
+        lang.value = "python";
+        setCodeMethodology('AUTO');
+        input.value = `import decimal
+
+def process_wallet_checkout(account_id, payment_amount, merchant_id):
+    # Stage IV/V Flaw: Negative amount or currency truncation logic bypass
+    # Allows business logic exploitation and ledger reconciliation balance tampering
+    user_balance = get_account_balance(account_id)
+    
+    # Missing transactional concurrency lock and integrity bounds check
+    if user_balance >= payment_amount:
+        new_balance = user_balance - payment_amount
+        update_ledger(account_id, new_balance)
+        disburse_funds_to_merchant(merchant_id, payment_amount)
+        return {"status": "success", "remaining_balance": new_balance}
+    
+    return {"status": "insufficient_funds"}`;
       } else if (type === 'agent_tool') {
         title.value = "Autonomous Agent External Tool Invoker";
         lang.value = "python";
-        setCodeMethodology('MAESTRO');
+        setCodeMethodology('AUTO');
         input.value = `from langchain.agents import AgentExecutor
 import requests
 
@@ -1918,7 +1706,7 @@ def agent_worker_tool(target_url, command_payload):
       } else if (type === 'can_handler') {
         title.value = "Vehicle Gateway CAN-FD Ingress Processor";
         lang.value = "c";
-        setCodeMethodology('TARA');
+        setCodeMethodology('AUTO');
         input.value = `#include <stdio.h>
 #include <string.h>
 
@@ -1946,7 +1734,8 @@ void process_can_frame(uint32_t can_id, uint8_t* payload, size_t len) {
       const countBadge = document.getElementById('code-findings-count');
 
       btn.disabled = true;
-      btn.innerHTML = `<span class="spinner"></span> Performing ${selectedCodeMethodology} Code Analysis...`;
+      const isAuto = selectedCodeMethodology === 'AUTO';
+      btn.innerHTML = `<span class="spinner"></span> ${isAuto ? 'AI Understanding Code & Selecting Model...' : `Performing ${selectedCodeMethodology} Code Analysis...`}`;
 
       try {
         const payload = {
@@ -1975,14 +1764,34 @@ void process_can_frame(uint32_t can_id, uint8_t* payload, size_t len) {
         countBadge.style.display = 'inline-block';
         countBadge.innerText = `${data.threats_generated} Threats Found`;
 
+        const domainBadge = data.detected_domain ? `<span class="badge-pill" style="background: rgba(99, 102, 241, 0.25); color: #a5b4fc; border: 1px solid rgba(99, 102, 241, 0.5); font-weight: 600;">🎯 Domain: ${data.detected_domain}</span>` : '';
+        const autoDetected = isAuto;
+
         let cardsHtml = `
-          <div style="background: rgba(2, 132, 199, 0.1); border: 1px solid rgba(2, 132, 199, 0.3); border-radius: 8px; padding: 10px 14px; font-size: 0.85rem; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <strong>${data.snippet_title}</strong> (${data.language.toUpperCase()}) &bull; <span style="color: #38bdf8;">${data.methodology}</span>
+          <div style="background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 27, 75, 0.75) 100%); border: 1px solid rgba(99, 102, 241, 0.4); border-radius: 8px; padding: 14px 16px; margin-bottom: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span class="badge-pill" style="background: ${autoDetected ? 'linear-gradient(135deg, #0284c7 0%, #6366f1 100%)' : 'var(--primary)'}; color: #fff; font-weight: 600;">
+                  ${autoDetected ? '✨ AI Selected: ' : 'Framework: '}${data.methodology}
+                </span>
+                ${domainBadge}
+              </div>
+              <div style="font-size: 0.75rem; color: var(--text-muted);">
+                Analyzed in <strong>${data.execution_time_ms}ms</strong> via ${data.model_used}
+              </div>
             </div>
-            <div style="font-size: 0.75rem; color: var(--text-muted);">
-              Analyzed in <strong>${data.execution_time_ms}ms</strong> via ${data.model_used}
-            </div>
+            
+            ${data.code_purpose_summary ? `
+              <div style="font-size: 0.85rem; line-height: 1.5; color: #f1f5f9; margin-bottom: 8px;">
+                <strong style="color: #38bdf8;">🧠 Code Understanding:</strong> ${data.code_purpose_summary}
+              </div>
+            ` : ''}
+            
+            ${data.selected_methodology_rationale ? `
+              <div style="font-size: 0.8rem; line-height: 1.45; color: #cbd5e1; background: rgba(0,0,0,0.35); padding: 8px 12px; border-radius: 6px; border-left: 3px solid #6366f1;">
+                <strong style="color: #a5b4fc;">Selection Rationale:</strong> ${data.selected_methodology_rationale}
+              </div>
+            ` : ''}
           </div>
         `;
 
@@ -1992,9 +1801,9 @@ void process_can_frame(uint32_t can_id, uint8_t* payload, size_t len) {
           const mits = t.mitigations || [];
           
           let mitHtml = mits.map(m => `
-            <div style="background: rgba(255,255,255,0.04); border-left: 3px solid #22c55e; padding: 6px 10px; border-radius: 0 4px 4px 0; font-size: 0.8rem; margin-top: 6px;">
-              <strong>${m.title}</strong><br>
-              <span style="color: #cbd5e1;">${m.description}</span>
+            <div style="background: rgba(34, 197, 94, 0.08); border-left: 3px solid #22c55e; padding: 8px 12px; border-radius: 0 6px 6px 0; font-size: 0.8rem; margin-top: 8px;">
+              <div style="font-weight: 600; color: #86efac; margin-bottom: 2px;">${m.title}</div>
+              <div style="color: #cbd5e1; line-height: 1.4;">${m.description}</div>
             </div>
           `).join('');
 
@@ -2003,7 +1812,7 @@ void process_can_frame(uint32_t can_id, uint8_t* payload, size_t len) {
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
                 <div>
                   <span class="cat-badge" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3);">${t.threat_category}</span>
-                  <span style="font-size: 0.72rem; color: var(--text-muted); margin-left: 6px;">${t.source_reference || 'Code construct'}</span>
+                  <span style="font-size: 0.72rem; color: #94a3b8; margin-left: 6px; font-family: var(--font-mono);">${t.source_reference || 'Code construct'}</span>
                   <h4 style="margin: 4px 0; font-size: 0.95rem; color: #fff;">${t.title}</h4>
                 </div>
                 <span class="sev-pill ${sevClass}">${ra.severity || 'Medium'}</span>

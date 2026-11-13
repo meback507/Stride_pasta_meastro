@@ -233,3 +233,62 @@ Format the output strictly as valid JSON adhering to:
             }
         ]
 
+    def generate_simulated_code_threats(
+        self,
+        code_snippet: str,
+        language: str = "auto",
+        snippet_title: str = "Enterprise Code"
+    ) -> List[Dict[str, Any]]:
+        return [
+            {
+                "threat_category": "Stage IV: Threat Analysis",
+                "title": f"Financially Motivated Transaction Tampering & Fraud in {snippet_title}",
+                "description": "An adversary manipulates pricing, discount, or payment parameters before submission, exploiting inadequate business invariant validation in code.",
+                "attack_vector": "Business Logic Abuse / Parameter Manipulation / Negative Amount Fraud",
+                "component_name": snippet_title,
+                "asset_name": "Financial Transactions & Billing Ledger",
+                "source_reference": "Code Snippet: Transaction and pricing calculation lines",
+                "likelihood": 4,
+                "impact": 5,
+                "attack_scenario": {
+                    "description": "1. Attacker intercepts checkout API payload. 2. Modifies amount parameter to zero or negative value. 3. Code executes transaction without asserting amount > 0. 4. Order is processed without payment.",
+                    "pre_conditions": "Client can modify transaction request parameters",
+                    "post_conditions": "Direct financial fraud, revenue loss, and ledger reconciliation discrepancies"
+                },
+                "mitigations": [
+                    {
+                        "title": "Server-Side Invariant Validation & Ledger Verification",
+                        "description": "Re-calculate all prices, totals, and discounts exclusively server-side using authoritative database records. Assert strict positive amount invariants.",
+                        "mitigation_type": "Preventive",
+                        "effort": "Low"
+                    }
+                ],
+                "security_requirement": "All financial calculations must occur strictly on trusted server backends with non-negative invariant assertions."
+            },
+            {
+                "threat_category": "Stage V: Vulnerability & Weakness Analysis",
+                "title": f"Race Condition & Double-Spend in Balance State Machine in {snippet_title}",
+                "description": "Concurrent transaction requests exploit non-atomic database read-then-write operations, allowing a user to spend the same account balance multiple times.",
+                "attack_vector": "CWE-362 Concurrent Execution using Shared Resource with Improper Synchronization (Race Condition)",
+                "component_name": snippet_title,
+                "asset_name": "Account Balance & User Wallets",
+                "source_reference": "Code Snippet: Balance update logic",
+                "likelihood": 3,
+                "impact": 5,
+                "attack_scenario": {
+                    "description": "1. Attacker fires 10 simultaneous transfer requests within milliseconds. 2. Threads read identical initial balance. 3. All transfers complete before balance is decremented.",
+                    "pre_conditions": "Concurrent request capability on checkout/transfer endpoint",
+                    "post_conditions": "Negative account balance and financial double-spend loss"
+                },
+                "mitigations": [
+                    {
+                        "title": "Pessimistic Row-Level Locking or Distributed Mutex",
+                        "description": "Execute balance updates inside database transactions with 'SELECT FOR UPDATE' locking or Redis distributed locks (Redlock).",
+                        "mitigation_type": "Preventive",
+                        "effort": "Medium"
+                    }
+                ],
+                "security_requirement": "State modifications affecting financial balances must enforce ACID isolation with pessimistic locking."
+            }
+        ]
+

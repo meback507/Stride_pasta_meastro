@@ -67,7 +67,7 @@ class CodeSnippetAnalysisRequest(BaseModel):
     code: str = Field(..., description="Source code snippet to perform threat modeling on")
     language: Optional[str] = Field(default="auto", description="Programming language of snippet")
     snippet_title: Optional[str] = Field(default="Pasted Code Snippet", description="Snippet or module name")
-    methodology_code: str = Field(default="STRIDE", description="Methodology: STRIDE, PASTA, MAESTRO, TARA")
+    methodology_code: Optional[str] = Field(default="AUTO", description="Methodology: STRIDE, PASTA, MAESTRO, TARA, or AUTO for auto-detection")
     provider: Optional[str] = Field(default="simulation", description="simulation, openai, ollama")
     model_name: Optional[str] = None
     custom_instructions: Optional[str] = None
@@ -84,6 +84,9 @@ class CodeSnippetAnalysisResponse(BaseModel):
     threats_generated: int
     execution_time_ms: int
     summary: str
+    code_purpose_summary: Optional[str] = None
+    selected_methodology_rationale: Optional[str] = None
+    detected_domain: Optional[str] = None
     provider_used: str
     model_used: str
     threats: List[ThreatResponse] = []

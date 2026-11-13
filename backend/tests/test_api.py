@@ -193,4 +193,59 @@ def agent_worker_tool(query):
     data_maestro = res_maestro.json()
     assert data_maestro["threats_generated"] > 0
 
+    # 3. Test Intelligent Auto-Detection of Methodology (Code Understanding)
+    # 3a. Agentic AI snippet with AUTO -> should select MAESTRO
+    res_auto_ai = client.post("/api/assessments/analyze-code-snippet", json={
+        "code": agent_code,
+        "language": "python",
+        "snippet_title": "Intelligent Agent",
+        "methodology_code": "AUTO",
+        "provider": "simulation"
+    })
+    assert res_auto_ai.status_code == 200
+    data_auto_ai = res_auto_ai.json()
+    assert "MAESTRO" in data_auto_ai["methodology"]
+    assert "Agentic AI" in data_auto_ai["detected_domain"]
+    assert len(data_auto_ai["code_purpose_summary"]) > 0
+    assert len(data_auto_ai["selected_methodology_rationale"]) > 0
+
+    # 3b. Automotive CAN snippet with AUTO -> should select TARA
+    can_code = """
+void process_can_frame(uint32_t can_id, uint8_t* payload, size_t len) {
+    if (can_id == 0x0120) { // Safety Critical Brake Actuation ID
+        actuate_brake(payload[0]); // Unauthenticated CAN frame actuation
+    }
+}
+"""
+    res_auto_can = client.post("/api/assessments/analyze-code-snippet", json={
+        "code": can_code,
+        "language": "c",
+        "snippet_title": "CAN Frame Receiver",
+        "methodology_code": "AUTO",
+        "provider": "simulation"
+    })
+    assert res_auto_can.status_code == 200
+    data_auto_can = res_auto_can.json()
+    assert "TARA" in data_auto_can["methodology"] or "21434" in data_auto_can["methodology"]
+    assert "Automotive" in data_auto_can["detected_domain"]
+
+    # 3c. Payment / financial snippet with AUTO -> should select PASTA
+    payment_code = """
+def process_order_payment(order_id, user_id, amount):
+    # Deduct balance and update ledger
+    ledger.record_transaction(order_id, amount)
+    gateway.charge_card(user_id, amount)
+"""
+    res_auto_pay = client.post("/api/assessments/analyze-code-snippet", json={
+        "code": payment_code,
+        "language": "python",
+        "snippet_title": "Payment Order Processor",
+        "methodology_code": "AUTO",
+        "provider": "simulation"
+    })
+    assert res_auto_pay.status_code == 200
+    data_auto_pay = res_auto_pay.json()
+    assert "PASTA" in data_auto_pay["methodology"]
+    assert "Financial" in data_auto_pay["detected_domain"] or "Enterprise" in data_auto_pay["detected_domain"]
+
 

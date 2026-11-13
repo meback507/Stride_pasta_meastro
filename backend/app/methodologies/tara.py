@@ -274,3 +274,66 @@ Generate structured TARA findings strictly in valid JSON adhering to:
             }
         ]
 
+    def generate_simulated_code_threats(
+        self,
+        code_snippet: str,
+        language: str = "c",
+        snippet_title: str = "Vehicle Code"
+    ) -> List[Dict[str, Any]]:
+        return [
+            {
+                "threat_category": "Damage Scenario (SFOP)",
+                "title": f"Unauthenticated CAN-FD Frame Injection on Safety Bus in {snippet_title}",
+                "description": "The message handler processes CAN arbitration IDs and executes actuation functions without verifying cryptographic message authentication codes (MAC) or freshness values.",
+                "attack_vector": "CAN ID Spoofing / Missing SecOC Protection",
+                "component_name": snippet_title,
+                "asset_name": "Vehicle Actuation Commands (Brake/Steering)",
+                "source_reference": "Code Snippet: CAN ID parsing and actuation invocation",
+                "tara_feasibility": "High",
+                "tara_impact_sfop": "S:Severe, F:Major, O:Major, P:Low",
+                "likelihood": 4,
+                "impact": 5,
+                "attack_scenario": {
+                    "description": "1. Compromised ECU or attacker tool sends crafted CAN frame with ID matching safety function. 2. Code processes payload without MAC check. 3. Vehicle performs uncommanded actuation while moving.",
+                    "pre_conditions": "Physical or pivoted network presence on vehicle CAN bus",
+                    "post_conditions": "Loss of vehicular control and potential physical safety hazard"
+                },
+                "mitigations": [
+                    {
+                        "title": "Implement AUTOSAR SecOC with Cryptographic Freshness",
+                        "description": "Mandate SecOC verification with truncated CMAC (AES-128) and synchronized freshness counter for all safety-critical frame arbitration IDs.",
+                        "mitigation_type": "Preventive",
+                        "effort": "High"
+                    }
+                ],
+                "security_requirement": "[CG-SEC-01] All safety-relevant CAN-FD frames must verify cryptographic authenticity using SecOC before actuation execution."
+            },
+            {
+                "threat_category": "Attack Path & Feasibility",
+                "title": f"Buffer Overflow in Embedded C Payload Deserializer in {snippet_title}",
+                "description": "Fixed-size payload buffer copies or missing boundary checks permit an oversized frame payload to corrupt stack frames or overwrite return addresses in ECU memory.",
+                "attack_vector": "CWE-120 Buffer Copy without Checking Size of Input",
+                "component_name": snippet_title,
+                "asset_name": "ECU Microcontroller Memory",
+                "source_reference": "Code Snippet: Payload buffer handling",
+                "tara_feasibility": "Medium",
+                "tara_impact_sfop": "S:Major, F:Moderate, O:Severe, P:Low",
+                "likelihood": 3,
+                "impact": 5,
+                "attack_scenario": {
+                    "description": "1. Attacker sends CAN-FD frame exceeding expected byte length. 2. Handler copies bytes into stack buffer. 3. Stack smashed, causing ECU reset or arbitrary execution.",
+                    "pre_conditions": "Access to vehicle bus communicating with target ECU",
+                    "post_conditions": "ECU watchdog reset, loss of real-time control loop, or code execution"
+                },
+                "mitigations": [
+                    {
+                        "title": "Strict Length Checking & Memory-Safe Ingress Buffers",
+                        "description": "Verify that input payload length exactly matches expected DLC (Data Length Code) before memory copy. Enable compiler stack canaries (-fstack-protector-strong).",
+                        "mitigation_type": "Preventive",
+                        "effort": "Low"
+                    }
+                ],
+                "security_requirement": "[CG-MEM-02] Ingress frame deserializers must strictly enforce maximum bound checks on all payload buffers."
+            }
+        ]
+
