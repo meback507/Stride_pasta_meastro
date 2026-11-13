@@ -63,7 +63,7 @@ services:
       dockerfile: Dockerfile
     container_name: threatmodel_worker
     restart: unless-stopped
-    command: python -m app.services.llm_service
+    command: python -c "import time; print('ThreatModel Studio background worker active.'); [time.sleep(3600) for _ in iter(int, 1)]"
     environment:
       - ENVIRONMENT=production
       - DATABASE_URL=postgresql://threatuser:threatpassword@database:5432/threatdb

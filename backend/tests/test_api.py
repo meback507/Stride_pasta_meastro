@@ -1,4 +1,5 @@
 import os
+import io
 import pytest
 from fastapi.testclient import TestClient
 import sys
@@ -247,5 +248,59 @@ def process_order_payment(order_id, user_id, amount):
     data_auto_pay = res_auto_pay.json()
     assert "PASTA" in data_auto_pay["methodology"]
     assert "Financial" in data_auto_pay["detected_domain"] or "Enterprise" in data_auto_pay["detected_domain"]
+
+
+def test_multiple_documents_upload_and_analysis():
+    # 1. Create project
+    proj_res = client.post("/api/projects", json={
+        "name": "Connected Autonomous Vehicle Gateway",
+        "business_domain": "Automotive Telematics",
+        "technical_scope": "Cellular gateway, CAN-FD boundary controller, OTA flash manager",
+        "components": [
+            {"name": "Telematics Control Unit", "type": "Gateway", "trust_zone": "Vehicle Boundary"},
+            {"name": "Brake ECU", "type": "Actuator", "trust_zone": "Chassis CAN Network"}
+        ],
+        "assets": [
+            {"name": "Vehicle Telemetry Stream", "type": "Data", "sensitivity": "Critical"}
+        ]
+    })
+    assert proj_res.status_code == 201
+    project = proj_res.json()
+    proj_id = project["id"]
+
+    # 2. Upload multiple architecture and requirement documents
+    files = [
+        ("files", ("architecture_spec.txt", io.BytesIO(b"Architecture Spec: Telematics Control Unit connects to 4G/5G and bridges to CAN-FD."), "text/plain")),
+        ("files", ("security_reqs.json", io.BytesIO(b'{"requirements": ["SecOC MAC verification on CAN 0x120", "TLS 1.3 for OTA updates"]}'), "application/json")),
+        ("files", ("data_flow.md", io.BytesIO(b"# Data Flow\nTelematics Unit receives remote commands and relays to Brake ECU."), "text/markdown"))
+    ]
+    upload_res = client.post(f"/api/documents/upload-multiple?project_id={proj_id}", files=files)
+    assert upload_res.status_code == 201
+    docs = upload_res.json()
+    assert len(docs) == 3
+    assert all(d["extracted_text"] for d in docs)
+    assert any("CAN-FD" in d["extracted_text"] for d in docs)
+
+    # 3. Create ISO/SAE 21434 TARA Assessment
+    ass_res = client.post("/api/assessments", json={
+        "project_id": proj_id,
+        "methodology_code": "TARA",
+        "name": "ISO 21434 Vehicle Threat Assessment",
+        "version": "v1.0"
+    })
+    assert ass_res.status_code == 201
+    assessment = ass_res.json()
+
+    # 4. Run AI Threat Analysis with documents in context
+    analyze_res = client.post(f"/api/assessments/{assessment['id']}/analyze", json={
+        "provider": "simulation",
+        "depth": "comprehensive",
+        "custom_instructions": "Focus on remote cellular interfaces and CAN bus tampering"
+    })
+    assert analyze_res.status_code == 200
+    result = analyze_res.json()
+    assert result["threats_generated"] > 0
+    assert "TARA" in result["methodology"] or "21434" in result["methodology"]
+
 
 

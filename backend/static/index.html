@@ -950,21 +950,34 @@ def handle_user_command(user_id, raw_cmd):
       <div id="wizard-step-4" class="panel" style="display: none;">
         <div class="panel-header">
           <div class="panel-title">Step 4 – Upload Architecture Documents & Diagrams</div>
+          <span class="badge-pill" id="upload-status-badge">Multi-File Ingestion</span>
         </div>
         <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1.25rem;">
-          Upload PDF, DOCX, XLSX, PPTX, TXT, JSON, or architecture diagrams. The platform parses and extracts system details while isolating untrusted content within strict prompt boundaries.
+          Upload multiple architecture specifications, requirements sheets, DFDs, data catalogs, and system diagrams (PDF, DOCX, XLSX, PPTX, JSON, Markdown, Images). All files are concurrently ingested and combined into a unified analysis context with strict prompt-guard boundary isolation.
         </p>
 
-        <div style="border: 2px dashed var(--card-border); border-radius: 10px; padding: 2.5rem; text-align: center; margin-bottom: 1.5rem; background: #090e17;">
-          <input type="file" id="wiz-file-upload" style="display: none;" onchange="handleFileUpload(event)">
+        <div id="wizard-drop-zone"
+             style="border: 2px dashed var(--card-border); border-radius: 10px; padding: 2.25rem; text-align: center; margin-bottom: 1.5rem; background: #090e17; transition: border-color 0.2s, background 0.2s; cursor: pointer;"
+             ondragover="handleDragOver(event)"
+             ondragleave="handleDragLeave(event)"
+             ondrop="handleFileDrop(event)"
+             onclick="document.getElementById('wiz-file-upload').click()">
+          <input type="file" id="wiz-file-upload" multiple style="display: none;" onchange="handleFilesSelected(event)">
           <div style="font-size: 2.5rem; margin-bottom: 8px;">📂</div>
-          <div style="font-weight: 600; margin-bottom: 4px;">Drag and drop architecture specifications or click to browse</div>
-          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 16px;">Supports PDF, DOCX, XLSX, PPTX, TXT, JSON, Markdown, PNG, JPEG</div>
-          <button class="btn btn-secondary" onclick="document.getElementById('wiz-file-upload').click()">Browse Files</button>
+          <div style="font-weight: 600; margin-bottom: 4px; font-size: 1rem;">Drag & drop multiple architecture files here, or click to browse</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 14px;">Select multiple files at once &bull; PDF, DOCX, XLSX, PPTX, TXT, JSON, MD, PNG, JPEG</div>
+          <button type="button" class="btn btn-secondary" onclick="event.stopPropagation(); document.getElementById('wiz-file-upload').click()" style="margin: 0 auto;">Browse Multiple Files</button>
         </div>
 
-        <div id="uploaded-files-list" style="margin-bottom: 1.5rem;">
-          <!-- Uploaded files display here -->
+        <!-- Files list container -->
+        <div id="uploaded-files-container" style="display: none; margin-bottom: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <div id="files-summary-text" style="font-size: 0.85rem; font-weight: 600; color: #38bdf8;">0 Files Selected</div>
+            <button type="button" class="btn btn-secondary" style="padding: 2px 8px; font-size: 0.75rem;" onclick="clearAllUploadedFiles()">Clear All</button>
+          </div>
+          <div id="uploaded-files-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 280px; overflow-y: auto;">
+            <!-- Uploaded files rendered dynamically -->
+          </div>
         </div>
 
         <div style="display: flex; justify-content: space-between;">
@@ -1288,16 +1301,158 @@ def handle_user_command(user_id, raw_cmd):
       container.appendChild(div);
     }
 
-    function handleFileUpload(e) {
-      const files = e.target.files;
+    // Multi-File Upload & Ingestion State
+    let wizardUploadedFiles = [];
+
+    function formatFileSize(bytes) {
+      if (bytes < 1024) return bytes + ' B';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function getFileIcon(filename) {
+      const ext = (filename.split('.').pop() || '').toLowerCase();
+      if (ext === 'pdf') return '📕';
+      if (['docx', 'doc'].includes(ext)) return '📘';
+      if (['xlsx', 'xls', 'csv'].includes(ext)) return '📗';
+      if (['pptx', 'ppt'].includes(ext)) return '📙';
+      if (['json', 'yaml', 'yml', 'txt', 'md'].includes(ext)) return '📝';
+      if (['png', 'jpg', 'jpeg', 'svg'].includes(ext)) return '🖼️';
+      return '📄';
+    }
+
+    function handleFilesSelected(e) {
+      const files = Array.from(e.target.files || []);
       if (!files.length) return;
-      const list = document.getElementById('uploaded-files-list');
-      list.innerHTML = '';
       for (let f of files) {
-        list.innerHTML += `<div style="background: rgba(255,255,255,0.05); padding: 8px 12px; border-radius: 6px; font-size: 0.85rem; margin-top: 6px;">
-          📄 <strong>${f.name}</strong> (${(f.size / 1024).toFixed(1)} KB) – <span style="color: #22c55e;">Ready for Ingestion</span>
-        </div>`;
+        if (!wizardUploadedFiles.some(existing => existing.name === f.name && existing.size === f.size)) {
+          wizardUploadedFiles.push(f);
+        }
       }
+      e.target.value = ''; // Reset input to allow adding more files
+      renderUploadedFiles();
+    }
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zone = document.getElementById('wizard-drop-zone');
+      if (zone) {
+        zone.style.borderColor = '#38bdf8';
+        zone.style.background = 'rgba(2, 132, 199, 0.12)';
+      }
+    }
+
+    function handleDragLeave(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zone = document.getElementById('wizard-drop-zone');
+      if (zone) {
+        zone.style.borderColor = 'var(--card-border)';
+        zone.style.background = '#090e17';
+      }
+    }
+
+    function handleFileDrop(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const zone = document.getElementById('wizard-drop-zone');
+      if (zone) {
+        zone.style.borderColor = 'var(--card-border)';
+        zone.style.background = '#090e17';
+      }
+      const files = Array.from(e.dataTransfer?.files || []);
+      for (let f of files) {
+        if (!wizardUploadedFiles.some(existing => existing.name === f.name && existing.size === f.size)) {
+          wizardUploadedFiles.push(f);
+        }
+      }
+      renderUploadedFiles();
+    }
+
+    function removeUploadedFile(index) {
+      wizardUploadedFiles.splice(index, 1);
+      renderUploadedFiles();
+    }
+
+    function clearAllUploadedFiles() {
+      wizardUploadedFiles = [];
+      renderUploadedFiles();
+    }
+
+    function renderUploadedFiles() {
+      const container = document.getElementById('uploaded-files-container');
+      const list = document.getElementById('uploaded-files-list');
+      const summaryText = document.getElementById('files-summary-text');
+      const badge = document.getElementById('upload-status-badge');
+
+      if (!container || !list) return;
+
+      if (wizardUploadedFiles.length === 0) {
+        container.style.display = 'none';
+        if (badge) badge.innerText = 'Multi-File Ingestion';
+        return;
+      }
+
+      container.style.display = 'block';
+      let totalBytes = wizardUploadedFiles.reduce((acc, f) => acc + f.size, 0);
+      if (summaryText) {
+        summaryText.innerHTML = `📁 <strong>${wizardUploadedFiles.length} Architecture File${wizardUploadedFiles.length > 1 ? 's' : ''}</strong> (${formatFileSize(totalBytes)}) ready for unified ingestion`;
+      }
+      if (badge) {
+        badge.innerText = `${wizardUploadedFiles.length} File${wizardUploadedFiles.length > 1 ? 's' : ''} Attached`;
+      }
+
+      list.innerHTML = wizardUploadedFiles.map((f, idx) => `
+        <div style="background: rgba(255,255,255,0.04); border: 1px solid var(--card-border); padding: 8px 12px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem;">
+          <div style="display: flex; align-items: center; gap: 8px; overflow: hidden;">
+            <span style="font-size: 1.1rem;">${getFileIcon(f.name)}</span>
+            <div style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+              <strong style="color: #f1f5f9;">${f.name}</strong>
+              <span style="color: var(--text-muted); font-size: 0.75rem; margin-left: 6px;">(${formatFileSize(f.size)})</span>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="color: #22c55e; font-size: 0.75rem; font-weight: 500;">Ready</span>
+            <button type="button" class="btn btn-secondary" onclick="removeUploadedFile(${idx})" style="padding: 2px 6px; font-size: 0.75rem; color: #ef4444;" title="Remove file">&times;</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateModelOptions() {
+      const provider = document.getElementById('wiz-llm-provider')?.value;
+      const customInst = document.getElementById('wiz-custom-instructions');
+      if (!customInst) return;
+      if (provider === 'openai') {
+        customInst.placeholder = "e.g. Focus on remote cellular interfaces and privilege escalation across CAN bus (Using gpt-4o)";
+      } else if (provider === 'ollama') {
+        customInst.placeholder = "e.g. Focus on prompt injection and tool boundaries (Using local Ollama model)";
+      } else {
+        customInst.placeholder = "e.g. Focus on remote cellular interfaces and privilege escalation across CAN bus";
+      }
+    }
+
+    // Safe API fetcher with detailed error handling (guards against HTML 502/500 parsing errors)
+    async function safeFetchJson(url, options = {}) {
+      const res = await fetch(url, options);
+      if (!res.ok) {
+        let errorMsg = `${res.status} ${res.statusText}`;
+        try {
+          const errJson = await res.json();
+          errorMsg = errJson.detail || errJson.message || JSON.stringify(errJson);
+        } catch (_) {
+          try {
+            const errText = await res.text();
+            if (errText) {
+              const clean = errText.replace(/<[^>]*>?/gm, ' ').replace(/\s+/g, ' ').trim();
+              errorMsg = clean.length > 200 ? clean.slice(0, 200) + '...' : clean;
+            }
+          } catch (_) {}
+        }
+        throw new Error(errorMsg);
+      }
+      return await res.json();
     }
 
     // Execute Wizard Analysis
@@ -1336,15 +1491,28 @@ def handle_user_command(user_id, raw_cmd):
           assets: assets
         };
 
-        const projRes = await fetch('/api/projects', {
+        const project = await safeFetchJson('/api/projects', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(projectPayload)
         });
-        const project = await projRes.json();
 
-        // 2. Create Assessment
-        const assRes = await fetch('/api/assessments', {
+        // 2. Ingest Multi-File Architecture Specifications
+        if (wizardUploadedFiles.length > 0) {
+          btn.innerHTML = `<span class="spinner"></span> Ingesting ${wizardUploadedFiles.length} Architecture Document(s)...`;
+          const formData = new FormData();
+          for (let f of wizardUploadedFiles) {
+            formData.append('files', f);
+          }
+          await safeFetchJson(`/api/documents/upload-multiple?project_id=${project.id}`, {
+            method: 'POST',
+            body: formData
+          });
+        }
+
+        // 3. Create Assessment
+        btn.innerHTML = `<span class="spinner"></span> Creating ${selectedMethodologyCode} Assessment...`;
+        const assessment = await safeFetchJson('/api/assessments', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1354,15 +1522,15 @@ def handle_user_command(user_id, raw_cmd):
             version: document.getElementById('wiz-project-version').value || 'v1.0'
           })
         });
-        const assessment = await assRes.json();
         activeAssessmentId = assessment.id;
 
-        // 3. Trigger AI Analysis
+        // 4. Trigger AI Analysis
+        btn.innerHTML = `<span class="spinner"></span> Running ${selectedMethodologyCode} Analysis...`;
         const provider = document.getElementById('wiz-llm-provider').value;
         const depth = document.getElementById('wiz-analysis-depth').value;
         const instructions = document.getElementById('wiz-custom-instructions').value;
 
-        const analyzeRes = await fetch(`/api/assessments/${assessment.id}/analyze`, {
+        const result = await safeFetchJson(`/api/assessments/${assessment.id}/analyze`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1371,7 +1539,6 @@ def handle_user_command(user_id, raw_cmd):
             custom_instructions: instructions
           })
         });
-        const result = await analyzeRes.json();
 
         // Redirect to threat register
         await loadThreatRegister();
@@ -1379,6 +1546,10 @@ def handle_user_command(user_id, raw_cmd):
       } catch (err) {
         alert(`Analysis failed: ${err.message}`);
       } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<span>🚀</span> Run AI Threat Modeling Analysis`;
+      }
+    }
         btn.disabled = false;
         btn.innerHTML = `<span>🚀</span> Run AI Threat Modeling Analysis`;
       }
@@ -1747,17 +1918,11 @@ void process_can_frame(uint32_t can_id, uint8_t* payload, size_t len) {
           custom_instructions: document.getElementById('code-custom-instructions').value
         };
 
-        const res = await fetch('/api/assessments/analyze-code-snippet', {
+        const data = await safeFetchJson('/api/assessments/analyze-code-snippet', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
-        if (!res.ok) {
-          throw new Error(`Server returned ${res.status}`);
-        }
-
-        const data = await res.json();
         activeAssessmentId = data.assessment_id;
 
         // Render findings
